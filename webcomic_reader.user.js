@@ -41,7 +41,7 @@ var defaultSettings = {
 // ==UserScript==
 // @name           Webcomic Reader
 // @author         ameboide
-// @version        2013.01.11
+// @version        2013.02.03
 // @namespace      http://userscripts.org/scripts/show/59842
 // @description    Can work on almost any webcomic/manga page, preloads 5 or more pages ahead (or behind), navigates via ajax for instant-page-change, lets you use the keyboard, remembers your progress, and it's relatively easy to add new sites
 // @lastchanges    fixed a couple minor bugs, fixed 4 sites, added 2 more
@@ -73,7 +73,7 @@ var defaultSettings = {
 // @include        http://www.nuklearpower.com/*
 // @include        http://www.reallifecomics.com/*
 // @include        http://reallifecomics.com/*
-// @include        http://pvponline.com/comic/*
+// @include        http://pvponline.com/*
 // @include        http://www.brawlinthefamily.com/*
 // @include        http://drmcninja.com/*
 // @include        http://www.vgcats.com/*/*
@@ -696,6 +696,7 @@ var defaultSettings = {
 // @include        http://webcomics.yaoi911.com/*
 // @include        http://www.whompcomic.com/*
 // @include        http://actiontimebuddies.com/*
+// @include        http://www.superbrophybrothers.com/*
 // ==/UserScript==
 
 var dataCache = null; //cache para no leer del disco y parsear la configuracion en cada getData
@@ -914,7 +915,11 @@ var paginas = [
 		img:	[['#p']],
 		back:	function(html, pos){
 					try{ return xpath('//a[.="« Prev" and not(starts-with(@href, "javascript:"))]', html); }
-					catch(e){ return xpath('//div[@id="top"]//option[contains("'+link[pos]+'", @value) and not(@value="/")]/following-sibling::option[1]/@value', html); }
+					catch(e){
+						var url = xpath('//div[@id="top"]//option[contains("'+link[pos]+'", @value) and not(@value="/")]/following-sibling::option[1]/@value', html);
+						var htmlPrev = syncRequest(url, pos);
+						return xpath('//a[.="Next »"]/preceding-sibling::a[1]', htmlPrev);
+					}
 				},
 		next:	function(html, pos){
 					try{ return xpath('//a[.="Next »" and not(contains(@href, "/end"))]', html); }
@@ -2034,12 +2039,12 @@ var paginas = [
 		extra:	[[['.entry']]]
 	},
 	{	url:	'jerkcity.com',
-		img:	[['p a>img']],
-		extra:	['<table align="center"><tr><td>',
-					[['[bgcolor="#999999"]:not([width])']],
-				'</td></tr></table>'],
-		txtcol:	'#000',
-		style:	'#wcr_div a{color:#000;}'
+		img:	[['.aidsy']],
+		extra:	[[['.slurping']]],
+		style:	'#wcr_div a{color:#000;}',
+		js:		function(dir){
+					if(!dir) document.onkeyup = '';
+				}
 	},
 	{	url:	'kiwiblitz.com|thepunchlineismachismo.com|zombieboycomics.com',
 		img:	[['#comic-1 img']],
@@ -3119,6 +3124,7 @@ var paginas = [
 		scrollx:'R'
 	},
 	{	url:	'shiftylook.com',
+		img:	[['.the-comic img']],
 		style:	'.the-comic{height:auto !important;}'
 	},
 	{	url:	'onlinereader.mangapirate.net',
@@ -3252,14 +3258,9 @@ var paginas = [
 					}
 					catch(e){
 						var chap = xpath('(//select[@class="cbo_wpm_chp"])/option[@selected]/following-sibling::option[1]/@value', html);
-						var request = new XMLHttpRequest();
-						request.open('GET', baseurl + chap +'/', false); 
-						request.send(null);
-
-						if (request.status === 200) {
-							var pag = xpath('(//select[@class="cbo_wpm_pag"])/option[last()]/@value', request.responseText);
-							return baseurl + chap +'/' + pag + '/';
-						}
+						var htmlPrev = syncRequest(baseurl + chap +'/', pos);
+						var pag = xpath('(//select[@class="cbo_wpm_pag"])/option[last()]/@value', htmlPrev);
+						return baseurl + chap +'/' + pag + '/';
 					}
 				},
 		next:	['//div[@class="wpm_seo"]/a[.="Next" and not(@href="")]'],
@@ -3330,6 +3331,13 @@ var paginas = [
 					catch(e){ return selCss('a.navi-prevchap', html); }
 				},
 		extra:	[[['#comic img', '', 1]], [['.entry']]]
+	},
+	{	url:	'superbrophybrothers.com',
+		img:	[['.post-body img']],
+		back:	'.="Back"',
+		next:	'.="Next"',
+		extra:	[['//div[contains(@class, "post-body")]//span[@title]/@title'], '<br/>',
+					['//u[.="News"]/following::span[./ancestor::*[contains(@class, "post-body")] and not(./ancestor::span/ancestor::*[contains(@class, "post-body")])]', '<br/>']]
 	}
 	/*
 	,
@@ -4598,6 +4606,16 @@ function error(msg){
 //ejecutar un script fuera del sandbox
 function exec(script){
 	document.location.href = 'javascript:(function(){' + script + '})();';
+}
+
+//ejecuta un request sincrono y retorna el html
+function syncRequest(url, pos){
+	var request = new XMLHttpRequest();
+	request.open('GET', absUrl(url, pos), false);
+	request.send(null);
+
+	if(request.status === 200) return request.responseText;
+	throw request.statusText;
 }
 
 //si se especifica no se toca, si no se usa el host sin el "www."
@@ -6556,9 +6574,12 @@ alert(
 
 /*todo:
 
-	poder hacer extras fijos (se llenan una vez y no se buscan ni se tocan mas)
 	poder definir un contenedor para cada extra
+		[v2] extras: {selector: [cosas, mascosas]}
+	poder hacer extras fijos (se llenan una vez y no se buscan ni se tocan mas)
+		[v2] agregar un contenedor de extras fijos, rellenarlo en el js o con extras: {contendorfijo: [function(html, pos){if(pos)return ''; return selector;}]}
 	poder leer extras por ajax?
+		function(){request sincrono}
 
 	en site settings, boton para exportar a formato copypasteable al script
 
