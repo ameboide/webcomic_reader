@@ -256,7 +256,7 @@ var defaultSettings = {
 // @include        http://rhapsodies.wpmorse.com/*
 // @include        http://www.piratesofmars.com/*
 // @include        http://www.soulless-comic.com/*
-// @include        http://www.earthsongsaga.com/*
+// @include        http://www.earthsongsaga.com/vol*
 // @include        http://rainchildstudios.com/strawberry/*
 // @include        http://www.goblinscomic.com/*
 // @include        http://www.venusenvycomic.com/*
@@ -571,7 +571,7 @@ var defaultSettings = {
 // @include        http://www.manga123.com/read/*
 // @include        http://manga.redhawkscans.com/*
 // @include        http://www.mudascantrad.com/*
-// @include        http://slide.extrascans.com/*
+// @include        http://slide.extrascans.net/*
 // @include        http://*.thewebcomic.com/*
 // @include        http://www.mangapark.com/*
 // @include        http://www.manga-go.com/*
@@ -595,6 +595,7 @@ var defaultSettings = {
 // @include        http://www.e2w-illustration.com/*
 // @include        http://2gamerz.com/*
 // @include        http://reader.fth-scans.com/*
+// @include        http://www.simple-scans.com/*
 // @include        http://simple-scans.com/*
 // @include        http://www.mymangaspot.com/*
 // @include        http://comic.naver.com/*
@@ -605,7 +606,6 @@ var defaultSettings = {
 // @include        http://www.mangatraders.com/*
 // @include        http://hentaifromhell.net/*
 // @include        http://trenchescomic.com/*
-// @include        http://reader.imperialscans.com/*
 // @include        http://www.sakicow.com/reader/*
 // @include        http://sakicow.com/reader/*
 // @include        http://www.goominet.com/unspeakable-vault/*
@@ -697,7 +697,43 @@ var defaultSettings = {
 // @include        http://www.whompcomic.com/*
 // @include        http://actiontimebuddies.com/*
 // @include        http://www.superbrophybrothers.com/*
+// @include        http://www.surasplace.com/*
+// @include        http://surasplace.com/*
+// @include        http://mangacow.me/*
+// @include        http://fallensyndicate.com/reader/*
+// @include        http://www.nekothekitty.net/*
+// @include        http://curtailedcomic.com/*
 // ==/UserScript==
+
+//TODO
+
+//ADD:
+// @include        http://www.wiemanga.com/*
+// @include        http://www.hentai4manga.com/*
+// @include        http://www.meinmanga.com/*
+// @include        http://www.manga-tu.be/*
+// @include        http://www.demanga.com/*
+// @include        http://de.ninemanga.com/*
+// @include        http://proxer.me/*
+// @include        http://bradcolbow.com/*
+// @include        http://www.gaomanga.com/*
+// @include        http://www.theherobiz.com/*
+// @include        http://guildedage.net/comic/*
+// @include        http://es.mangahere.com/*
+// @include        http://betweenfailures.com/*
+// @include        http://www.claudeandmonet.com/*
+
+
+//FIX:
+// *.katbox.net
+// http://reader.imangascans.org/
+// http://www.earthsongsaga.com/vol1/65.html (??)
+// batoto
+// mangafox (onerror)
+
+//OTROS:
+// opcion para poder seguir avanzando aunque no se haya terminado de cargar la imagen de la prox pagina
+// opciones maxResize y minResize (porcentaje), y booleanos para quedarse en el limite o volver al tamaño original cuando se pase
 
 var dataCache = null; //cache para no leer del disco y parsear la configuracion en cada getData
 var firstRun = false;
@@ -1289,9 +1325,10 @@ var paginas = [
 		extra:	[['//div[@class="post-comic"]']]
 	},
 	{	url:	'romanticallyapocalyptic.com',
-		img:	['//div[@class="views-field-field-imageurl-value"]//img'],
-		back:	'.="previous"',
-		next:	'.="next"'
+		img:	[['.comicmid img']],
+		back:	'span[@class="spritePrevious"]',
+		next:	'span[@class="spriteNext"]',
+		first:	'span[@class="spriteStart"]'
 	},
 	{	url:	'somethingpositive.net',
 		img:	'arch/|/arch/|sp',
@@ -1420,8 +1457,8 @@ var paginas = [
 	},
 	{	url:	'reader.imangascans.org',
 		img:	function(html, pos){
-					var page = parseInt(html.match(/else var page = parseInt\('(\d+)'\);/)[1]);
-					var pages = JSON.parse(html.match(/var pages = (.+);/)[1]);
+					var page = parseInt(html.match(/else var page = parseInt\('(\d+)'\);/)[1]) - 1;
+					var pages = JSON.parse(html.match(/var pages = (.+)(;|$)/m)[1]);
 					return pages.pg_base + pages.pages[page];
 				},
 		back:	function(html, pos){
@@ -1433,8 +1470,10 @@ var paginas = [
 					}
 					var selchap = selCss('[name="chapter"]', html);
 					if(selchap.selectedIndex){
-						return "http://reader.imangascans.org/" +
+						var chap = "http://reader.imangascans.org/" +
 							pars[1] + "/" + selchap.options[selchap.selectedIndex - 1].value;
+						var htmlPrev = syncRequest(chap, pos);
+						return chap + "/" + xpath('//select[@id="page_select"]/option[last()]/@value', htmlPrev);
 					}
 					throw 'fail';
 				},
@@ -1453,6 +1492,7 @@ var paginas = [
 					throw 'fail';
 				},
 		extra:	[['//div[@class="pager"]']],
+		xelem:	'//div[@class="pager"]/..',
 		layelem:'//div[@id="image_frame"]',
 		scrollx:'R'
 	},
@@ -1537,7 +1577,7 @@ var paginas = [
 	},
 	{	url:	'fakku.net',
 		img:	function(html, pos){
-					var data = JSON.parse(html.match(/var data = (.+);/)[1]);
+					var data = JSON.parse(html.match(/var data\s*=\s*(.+);/)[1]);
 					var x = link[0].match(/page=(\d+)/);
 					x = Number(x ? x[1] : 0)+pos;
 					if(!x) return '.';
@@ -1547,14 +1587,14 @@ var paginas = [
 					return html.match(/'([^']+\/c\/manga\/[^']+)'/)[1] + x + '.jpg'; 
 				},
 		back:	function(html, pos){
-					var data = JSON.parse(html.match(/var data = (.+);/)[1]);
+					var data = JSON.parse(html.match(/var data\s*=\s*(.+);/)[1]);
 					var x = link[0].match(/page=(\d+)/);
 					x = Number(x ? x[1] : 0)+pos-1;
 					if(x<0 || x>data.thumbs.length) throw 'fail';
 					return link[0].replace(/#.+/, '')+'##page='+x;
 				},
 		next:	function(html, pos){
-					var data = JSON.parse(html.match(/var data = (.+);/)[1]);
+					var data = JSON.parse(html.match(/var data\s*=\s*(.+);/)[1]);
 					var x = link[0].match(/page=(\d+)/);
 					x = Number(x ? x[1] : 0)+pos+1;
 					if(x<0 || x>data.thumbs.length) throw 'fail';
@@ -2407,14 +2447,12 @@ var paginas = [
 	},
 	{	url:	'goodmanga.net',
 		img:	[['#manga_viewer img']],
-		back:	'img[@alt="Previous"]',
-		next:	'img[@alt="Next"]',
-		extra:	[[['#bottom_chapter_list']], ' ', [['#bottom_page_list']]],
-		js:		function(dir){
-					exec("$$('#wcr_extra #bottom_chapter_list')[0].addEvent('change', changeUrl);"+
-						"$$('#wcr_extra #bottom_page_list')[0].addEvent('change', changeUrl); ");
-				},
-		style:	'#wcr_extra #bottom_chapter_list{ float: none; }',
+		back:	[['a.previous_page']],
+		next:	[['a.next_page']],
+		extra:	[[['#asset_1 select.chapter_select']], '<span>Page ', [['#asset_2 select.page_select']],
+					' ', ['//select[@class="page_select"]/following-sibling::span'], '</span>'],
+		xelem:	'//div[@id="manga_nav_top"]',
+		style:	'#manga_nav_bottom{display:none}',
 		scrollx:'R'
 	},
 	{	url:	'digitalcomicmuseum.com/preview',
@@ -2710,29 +2748,61 @@ var paginas = [
 		layelem:'//div[@id="thePic"]',
 		scrollx:'R'
 	},
-	{	url:	'foolrulez.org|mudascantrad.com|slide.extrascans.com|manga.redhawkscans.com|reader.fth-scans.com|simple-scans.com|reader.imperialscans.com',
-		img:	function(html, pos){
-					var num = link[pos].match(/##.*_(\d+)/);
-					num = num ? parseInt(num[1]) : 0;
-					var pages = JSON.parse(html.match(/var pages = (.+);/)[1]);
-					return pages[num].url;
-				},
+	{	url:	'foolrulez.org|manga.redhawkscans.com|mangatopia.net|simple-scans.com|mudascantrad.com|fallensyndicate.com|slide.extrascans.net|reader.fth-scans.com',
+		img:	[['#page img']],
 		back:	function(html, pos){
-					var num = link[pos].match(/##.*_(\d+)/);
-					num = num ? parseInt(num[1])-1 : -1;
-					if(num>0) return '##'+(pos-1)+'_'+num;
-					return xpath('//div[@class="tbtitle dropdown_parent" and contains(./div/a, "Chapter")]//li[./a[contains("'+link[pos]+'", @href)]]/following-sibling::li[1]/a/@href', html)+'##'+(pos-1)+'_0';
-				},
+				try{
+					var relpath = xpath('//div[@class="topbar_right"]/span[@class="numbers"]/div[contains(concat(" ",@class," ")," current_page ")]/following-sibling::div[1]//@href', html);
+					var basepath = "";
+					try{ basepath = html.match(/var\s+baseurl\s*=\s*(['"])(.*?)\1\s*;/i)[2]; }
+					catch(e){}
+					return basepath + relpath;
+				}
+				catch(e){
+					var chap = xpath('//div[@class="topbar_left"]/div[2]/ul/li[.//text()=//div[@class="topbar_left"]/div[2]/div/a/text()]/following-sibling::li[1]//@href', html);
+					var request = new XMLHttpRequest();
+					request.open('GET', chap, false); 
+					request.send(null);
+
+					if (request.status === 200) {
+						return xpath('//div[@class="topbar_right"]/div[1]/ul/li[last()]//@href', request.responseText);
+					}
+				}
+			},
 		next:	function(html, pos){
-					var num = link[pos].match(/##.*_(\d+)/);
-					num = num ? parseInt(num[1])+1 : 1;
-					var pages = JSON.parse(html.match(/var pages = (.+);/)[1]);
-					if(num < pages.length) return '##'+(pos+1)+'_'+num;
-					return html.match(/var next_chapter = "(.+)";/)[1] + '##'+(pos+1)+'_0';
-				},
+				try{
+					var relpath = xpath('//div[@class="topbar_right"]/span[@class="numbers"]/div[contains(concat(" ",@class," ")," current_page ")]/preceding-sibling::div[1]//@href', html);
+					var basepath = "";
+					try{ basepath = html.match(/var\s+baseurl\s*=\s*(['"])(.*?)\1\s*;/i)[2]; }
+					catch(e){}
+					return basepath + relpath;
+				}
+				catch(e){
+					return xpath('//div[@class="topbar_left"]/div[2]/ul/li[.//text()=//div[@class="topbar_left"]/div[2]/div/a/text()]/preceding-sibling::li[1]//@href', html);
+				}
+			},
 		js:		function(dir){
 					if(!dir) exec("$(document).unbind('keydown');");
 				},
+		extra:	[function(html, pos){
+					var topbar = selCss('div.topbar', html);
+					if (!topbar) return;
+					
+					var basepath = "";
+					try{ basepath = html.match(/var\s+baseurl\s*=\s*([\'\"])(.*?)\1\s*;/i)[2]; }
+					catch(e){}
+					var relpaths = xpath('//a[starts-with(@href,"page/")]', topbar, true);
+					for (var x = 0; x < relpaths.length; ++x) {
+						relpaths[x].setAttribute('href', basepath + relpaths[x].getAttribute('href'));
+					}
+					
+					var pagesLinks = xpath('//a[@onclick]', topbar, true);
+					for (var x = 0; x < pagesLinks.length; ++x) {
+						pagesLinks[x].removeAttribute('onclick');
+					}
+					return topbar.outerHTML;
+				}],
+		xelem:	'//div[@class="panel"]',
 		layelem:'//div[@id="page"]',
 		scrollx:'R',
 		style:	'#wrapper{overflow:visible !important;}'
@@ -2880,7 +2950,11 @@ var paginas = [
 		img:	[['#image']],
 		back:	[/value="Prev Page" onclick="window.location.href='([^']+)'"/, 1],
 		next:	[/value="Next Page" onclick="window.location.href='([^']+)'"/, 1],
-		scrollx:'R'
+		scrollx:'R',
+		extra:	[[['div#viewerHeader>div', '']], '<div class="clear"></div>', [['div#file_dropdown_top', '']], [['div#page_dropdown_top']], [['div#reportLink']], [['div#image_display div']]],
+		xelem:	'//div[@id="viewerHeader"]',
+		layelem:'//div[@id="image_display"]',
+		style:	'#page_dropdown_top,#file_dropdown_top,#page_path_bottom,#reportLink{display:none} #viewerHeader>div{display:block} #reportLink{padding-top:0 !important'
 	},
 	{	url:	'hentaifromhell.net',
 		img:	[['img.imageborder']],
@@ -3265,8 +3339,7 @@ var paginas = [
 				},
 		next:	['//div[@class="wpm_seo"]/a[.="Next" and not(@href="")]'],
 		extra:	[[['.wpm_nav']]],
-		xelem:	'//div[@class="wpm_nav"]',
-		style:	'#wcr_imagen{max-width:none;} .prw{overflow:visible !important;} .prw+div.wpm_nav{display:none;}',
+		style:	'#wcr_imagen{max-width:none;} .prw{overflow:visible !important;} div.wpm_nav{display:none} #wcr_extra>div.wpm_nav{display:block}',
 		scrollx:'R'
 	},
 	{	url:	'komikmy.com',
@@ -3338,6 +3411,94 @@ var paginas = [
 		next:	'.="Next"',
 		extra:	[['//div[contains(@class, "post-body")]//span[@title]/@title'], '<br/>',
 					['//u[.="News"]/following::span[./ancestor::*[contains(@class, "post-body")] and not(./ancestor::span/ancestor::*[contains(@class, "post-body")])]', '<br/>']]
+	},
+	{	url:	'surasplace.com',
+		img:	function(html, pos){
+					var data = document.querySelectorAll('a.sigProLink'),
+					x = link[0].match(/[&?]ipage=(.*?)(&|$)/i);
+					x = Number(x ? x[1] : 0) + pos;
+					if(!x) return '.';
+					if(x<0 || x>data.length) throw 'fail';
+					return data[x-1].getAttribute('image-src') || data[x-1].href;
+				},
+		back:	function(html, pos){
+					var data = document.querySelectorAll('a.sigProLink'),
+					pgregex = /(\\?|\\&)ipage=(.*?)(?=(&|$))/i,
+					x = link[0].match(pgregex);
+					x = Number(x ? x[2] : 0) + pos - 1;
+					if (x<0 || x>data.length) throw 'fail';
+					if (!x) return link[0].replace(/#.*$|(\\?|\\&)ipage=(.*?)(&|$)/gi, '');
+					if (pgregex.test(link[0])) return link[0].replace(pgregex, '$1ipage=' + x);
+					return link[0].replace(/#.*$/, '') + (/\?./.test(link[0])?'&':'?') + 'ipage=' + x;
+				},
+		next:	function(html, pos){
+					var data = document.querySelectorAll('a.sigProLink'),
+					pgregex = /(\\?|\\&)ipage=(.*?)(?=(&|$))/i,
+					x = link[0].match(pgregex);
+					x = Number(x ? x[2] : 0)+pos+1;
+					if(x<0 || x>data.length) throw 'fail';
+					if (pgregex.test(link[0])) return link[0].replace(pgregex, '$1ipage=' + x);
+					return link[0].replace(/#.*$/, '') + (/\?./.test(link[0])?'&':'?') + 'ipage=' + x;
+				},
+		extra:	['Images from article: ', ['//div[@class="page-header"]/following-sibling::p[1]/text()'],
+					function(html, pos){
+						var data = document.querySelectorAll('a.sigProLink'),
+						x = link[0].match(/[&?]ipage=(.*?)(&|$)/i);
+						if (!(data && data.length)) throw 'fail';
+						x = Number(x ? x[1] : 0)+pos;
+						if (!x) return "<br/>Thumbs";
+						var filename = data[x-1].getAttribute('image-src') || data[x-1].href;
+						return "<br/>Image " + x + " of " + data.length + " (File: '" + filename.replace(/^.*\//, '') + "')";
+					}
+				],
+		js:		function(dir){
+					var pgregex = /(\\?|\\&)ipage=.*?(?=(&|$))/i, x;
+					x = link[0].match(pgregex);
+					x = Number(x ? x[2] : 0)+posActual;
+					if (!x) scrollTo(0,0);
+					
+					if (!dir) {
+						function changeIPage(url, pagenum) {
+							if (pgregex.test(url)) return url.replace(pgregex, '$1ipage=' + pagenum);
+							return url.replace(/#.*$/, '') + (/\?./.test(url)?'&':'?') + 'ipage=' + pagenum;
+						}
+						
+						var contentLinks = document.querySelectorAll('a.sigProLink');
+						for (x = 0; x < contentLinks.length;) {
+							contentLinks[x].removeAttribute('rel');
+							contentLinks[x].removeAttribute('target');
+							contentLinks[x].setAttribute('image-src', contentLinks[x].href);
+							contentLinks[x].href = changeIPage(link[0], ++x);
+						}
+					}
+				},
+		scrollx:'R',
+		layelem:'//div[@class="sigProPrintMessage"]',
+		style:	'#header, .navbar-fixed-top, .navbar-fixed-bottom {position:static;}'
+	},
+	{	url:	'mangacow.me',
+		img:	[['.prw img']],
+		back:	function(html, pos){
+					var baseurl = xpath('(//select[@class="cbo_wpm_chp"])/@onchange', html).replace(/^.*?'|'.*$/g, '');
+					try{
+						var pag = xpath('(//select[@class="cbo_wpm_pag"])/option[@selected]/preceding-sibling::option[1]/@value', html);
+						var chap = selCss('select.cbo_wpm_chp > option[selected]', html).value;
+						return baseurl + chap +'/' + pag + '/';
+					}
+					catch(e){
+						var chap = xpath('(//select[@class="cbo_wpm_chp"])/option[@selected]/following-sibling::option[1]/@value', html);
+						var request = new XMLHttpRequest();
+						request.open('GET', baseurl + chap +'/', false); 
+						request.send(null);
+
+						if (request.status === 200) {
+							var pag = xpath('(//select[@class="cbo_wpm_pag"])/option[last()]/@value', request.responseText);
+							return baseurl + chap +'/' + pag + '/';
+						}
+					}
+				},
+		extra:	[[['div.wpm_nav']]],
+		style:	'div.wpm_nav {display:none} #wcr_extra>div.wpm_nav {display:block}'
 	}
 	/*
 	,
@@ -5848,8 +6009,8 @@ function initValoresSitio(props, conf){
 						seltipo.value = 'fn';
 						//sacar el "^func..{" y el "}$"
 						var fn = valor.toString();
-						fn = fn.replace(/^.+?\{\s*|\s*\}$/g, '');
-						fn = fn.replace(/^    /mg, '');
+						fn = fn.replace(/^.+?\{(\s*[\r\n]+)*|\s*\}$/g, '');
+						fn = fn.replace(new RegExp('^' + fn.match(/^\s*/), 'mg'), '');
 						get(base+'_fn_val').innerHTML = fn;
 						break;
 					case 'boolean':
@@ -6412,7 +6573,7 @@ function getConfPagina(conf){
 //para matchear una url, se convierte un valor en string a regexp
 function strToRegexp(url){
 	url = url.replace(/[-[\]{}()+?.,\\^$#\s]/g, "\\$&");
-	url = url.replace(/\*\\\./g, '(\\w+\\.)?'); //'*.hola.com' matchea 'asd.hola.com' y 'hola.com', pero no 'chao.com/hola.com'
+	url = url.replace(/\*\\\./g, '([\\w-]+\\.)?'); //'*.hola.com' matchea 'asd.hola.com' y 'hola.com', pero no 'chao.com/hola.com'
 	url = url.replace(/\*/g, '.*');
 
 	var urls = url.split('|');
@@ -6573,6 +6734,13 @@ alert(
 */
 
 /*todo:
+
+	forma facil de extraer varias paginas a partir de un solo request (blogs, reddit, pags ajaxeadas, etc)
+		el img tendria q recuperar una lista de resultados
+		se agrega una funcion extra_context: function(html, pos, relpos) q retorna el contexto sobre el q se buscan los extras para cada item
+		las urls se rellenarian con ##pos-relativa-a-la-pag
+		los back/next buscan el link normalmente
+		el prefetcheador avanza los n de una
 
 	poder definir un contenedor para cada extra
 		[v2] extras: {selector: [cosas, mascosas]}
