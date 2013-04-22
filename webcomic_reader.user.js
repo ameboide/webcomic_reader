@@ -17,6 +17,7 @@ var defaultSettings = {
 	borderLR: 0, //pixels to leave as border to the sides of the image when zooming and scrolling
 	borderUD: 0, //pixels to leave as border above and below the image when zooming and scrolling
 	goToBookmark: true, //if you have 1 bookmark saved for a site, asks you if you want to go there when you visit the site
+	moveWhileLoading: false, //lets you change pages even if the image for the next page is still loading
 	debugMode: false, //alerts on errors, and shows some of the currently cache'd pages/images with the "," key
 	showSettingsOnFail: false, //if no settings are found for this site and default ones didn't work, show settings screen
 	keyboardShortcuts: { //keyboard shortcuts...
@@ -41,7 +42,7 @@ var defaultSettings = {
 // ==UserScript==
 // @name           Webcomic Reader
 // @author         ameboide
-// @version        2013.02.03
+// @version        2013.04.22
 // @namespace      http://userscripts.org/scripts/show/59842
 // @description    Can work on almost any webcomic/manga page, preloads 5 or more pages ahead (or behind), navigates via ajax for instant-page-change, lets you use the keyboard, remembers your progress, and it's relatively easy to add new sites
 // @lastchanges    fixed a couple minor bugs, fixed 4 sites, added 2 more
@@ -724,10 +725,6 @@ var defaultSettings = {
 // @include        http://www.claudeandmonet.com/*
 // @include        http://phobia.subcultura.es/tira/*
 
-//OTROS:
-// opcion para poder seguir avanzando aunque no se haya terminado de cargar la imagen de la prox pagina
-// opciones maxResize y minResize (porcentaje), y booleanos para quedarse en el limite o volver al tamaño original cuando se pase
-
 var dataCache = null; //cache para no leer del disco y parsear la configuracion en cada getData
 var firstRun = false;
 
@@ -787,6 +784,7 @@ var leftImageClick = confLeftImageClick(defaultSettings.clikLeftHalfGoesBack); /
 
 var goToBookmark = confBool('goToBookmark', defaultSettings.goToBookmark);
 var useHistoryAPI = confBool('useHistoryAPI', true);
+var moveWhileLoading = confBool('moveWhileLoading', defaultSettings.moveWhileLoading);
 
 var maximgs = Math.max(23, prefetchSize[1], prefetchSize[0]); //mantener solo este num de imagenes cargadas atras y adelante de la actual (2n+1) para no comer memoria
 var usarb64 = confBool('b64_images', false);
@@ -3709,6 +3707,11 @@ var fitSize = confBool('fit', defaultSettings.autozoom);
 var achw = confBool('achw', defaultSettings.shrinkWidth), achh = confBool('achh', defaultSettings.shrinkHeight);
 var agrw = confBool('agrw', defaultSettings.expandWidth), agrh = confBool('agrh', defaultSettings.expandHeight);
 
+var maxScale = confVal('maxScale', 0) * 1;
+var minScale = confVal('minScale', 0) * 1;
+var maxScaleReset = confBool('maxScaleReset', false);
+var minScaleReset = confBool('minScaleReset', false);
+
 var bordex = confVal('bordex', defaultSettings.borderLR); //borde a los lados de la imagen
 var bordey = confVal('bordey', defaultSettings.borderUD); //borde arriba y abajo
 
@@ -4091,7 +4094,8 @@ function absUrl(url, pos){
 //muestra la imagen q viene en esta direccion y prefetchea el link futuro
 function cambiaPag(dir, poppedState, slidden){
 	try{
-		if(dir && imagenOK[posActual+dir]===undefined && imagen[posActual+dir]!==null) return;
+		if(dir && imagenOK[posActual+dir]===undefined && imagen[posActual+dir]!==null &&
+			(!moveWhileLoading || imagen[posActual+dir]===undefined)) return;
 		if(imagen[posActual+dir]===null && link[posActual+dir] || imagenOK[posActual+dir]===false){
 			redirect(link[posActual+dir]);
 			return;
@@ -4191,6 +4195,28 @@ function fitImagen(reintentando){
 			if(achw && wi>ww){
 				hi = hi*ww/wi;
 				wi = ww;
+			}
+		}
+
+		var scale = wi/wihi.wi * 100;
+		if(maxScale && scale > maxScale){
+			if(maxScaleReset){
+				wi = wihi.wi;
+				hi = wihi.hi;
+			}
+			else{
+				wi = wihi.wi*maxScale/100;
+				hi = wihi.hi*maxScale/100;
+			}
+		}
+		else if(minScale && scale < minScale){
+			if(minScaleReset){
+				wi = wihi.wi;
+				hi = wihi.hi;
+			}
+			else{
+				wi = wihi.wi*minScale/100;
+				hi = wihi.hi*minScale/100;
 			}
 		}
 	}
@@ -4734,7 +4760,7 @@ function cursor(dir, elem){
 		return confCursor('noimg', elem, 'pointer');
 	}
 	if(imagenOK[posActual+dir]===undefined){ //cargando img
-		get('wcr_btn'+dir).disabled = true;
+		get('wcr_btn'+dir).disabled = !moveWhileLoading;
 		return confCursor('loading', elem, 'progress');
 	}
 	get('wcr_btn'+dir).disabled = false;
@@ -5555,6 +5581,13 @@ function mostrarSettings(){
 					'1':'Enabled'
 				}
 			},
+			moveWhileLoading:{ desc: 'Move while loading', title: 'Lets you move to the next or previous page before the image for that page has finished loading',
+				def: defaultSettings.moveWhileLoading ? '1' : '0',
+				vals:{
+					'0':'Disabled',
+					'1':'Enabled'
+				}
+			},
 
 			_grp_fit:{ desc:'AutoZoom', title:'Automatically zoom the image, either shrinking or expanding it to make it fit in the screen' },
 			fit:{ desc:'Fit image to screen', title:'Apply options below to fit the image to the screen (if none of them are selected and you enable this option, you will be prompted to select the settings the first time you visit each site). This setting can also be toggled for this site with a keyboard shortcut (+ by default)',
@@ -5590,6 +5623,22 @@ function mostrarSettings(){
 				vals:{
 					'0':'Never expand',
 					'1':'Expand when needed'
+				}
+			},
+			maxScale:{ desc:'Max scale', title: 'Maximum scale (as a percentage, > 100) to which the image should be expanded (leave blank for no limit)'},
+			minScale:{ desc:'Min scale', title: 'Minimum scale (as a percentage, < 100) to which the image should be shrunk (leave blank for no limit)'},
+			maxScaleReset:{ desc:'Over max scale', title: 'Action to be taken when the AutoZoom would expand the image over the max scale',
+				def: '0',
+				vals: {
+					'0': 'Keep the max scale',
+					'1': 'Reset to original size'
+				}
+			},
+			minScaleReset:{ desc:'Under min scale', title: 'Action to be taken when the AutoZoom would shrink the image over the min scale',
+				def: '0',
+				vals: {
+					'0': 'Keep the min scale',
+					'1': 'Reset to original size'
 				}
 			},
 
