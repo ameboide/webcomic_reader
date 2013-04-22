@@ -704,13 +704,14 @@ var defaultSettings = {
 // @include        http://fallensyndicate.com/reader/*
 // @include        http://www.nekothekitty.net/*
 // @include        http://curtailedcomic.com/*
+// @include        http://www.wiemanga.com/*
+// @include        http://img.wiemanga.com/*
+// @include        http://hentai4manga.com/*
 // ==/UserScript==
 
 //TODO
 
 //ADD:
-// @include        http://www.wiemanga.com/*
-// @include        http://www.hentai4manga.com/*
 // @include        http://www.meinmanga.com/*
 // @include        http://www.manga-tu.be/*
 // @include        http://www.demanga.com/*
@@ -1923,7 +1924,7 @@ var paginas = [
 		extra:	[[['#chapter']], [['#pages']]],
 		scrollx:'R'
 	},
-	{	url:	'tenmangas.com|tenmanga.com',
+	{	url:	'tenmangas.com|tenmanga.com|*.wiemanga.com',
 		img:	[['#comicpic']],
 		back:	[/pre_page = "(.+?)"/, 1],
 		next:	[/next_page = "(.+?)"/, 1],
@@ -3506,6 +3507,12 @@ var paginas = [
 	},
 	{	url:	'thedevilspanties.com',
 		extra:	[['//div[@class="entry"]']],
+	},
+	{	url:	'hentai4manga.com',
+		img:	[['#textboxContent img']],
+		back:	[['#sub_page_left a']],
+		next:	[['#sub_page_right a']],
+		style:	'#innerWrapper, .content{width: auto !important; max-width: none !important;} .textbox > div{float: none !important;}'
 	}
 	/*
 	,
