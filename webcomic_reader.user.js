@@ -722,14 +722,7 @@ var defaultSettings = {
 // @include        http://es.mangahere.com/*
 // @include        http://betweenfailures.com/*
 // @include        http://www.claudeandmonet.com/*
-
-
-//FIX:
-// *.katbox.net
-// http://reader.imangascans.org/
-// http://www.earthsongsaga.com/vol1/65.html (??)
-// batoto
-// mangafox (onerror)
+// @include        http://phobia.subcultura.es/tira/*
 
 //OTROS:
 // opcion para poder seguir avanzando aunque no se haya terminado de cargar la imagen de la prox pagina
@@ -795,7 +788,7 @@ var leftImageClick = confLeftImageClick(defaultSettings.clikLeftHalfGoesBack); /
 var goToBookmark = confBool('goToBookmark', defaultSettings.goToBookmark);
 var useHistoryAPI = confBool('useHistoryAPI', true);
 
-var maximgs = Math.max(23, prefetchSize[1], prefetchSize[-1]); //mantener solo este num de imagenes cargadas atras y adelante de la actual (2n+1) para no comer memoria
+var maximgs = Math.max(23, prefetchSize[1], prefetchSize[0]); //mantener solo este num de imagenes cargadas atras y adelante de la actual (2n+1) para no comer memoria
 var usarb64 = confBool('b64_images', false);
 
 /* paginas[i] = {
@@ -1131,7 +1124,11 @@ var paginas = [
 		extra:	[function(html, pos){
 					if(extra[0]) return extra[0].replace(/(<\/select>)[\s\S]*/i, '$1');
 					return contenido(html, ['//select[@id="bottom_chapter_list"]'], pos);
-				}, ' ', [['select.m']], '<select id="top_chapter_list" style="display:none"/>'],
+				}, ' ', [['select.m']], '<select id="top_chapter_list" style="display:none"></select>',
+				function(html, pos){
+					var alt = xpath('//img[@id="image"]/@onerror', html).replace(/^.+?'|'$/g, '');
+					return '<a id="alt_img" style="display:none" href="'+alt+'"/>';
+				}],
 		js:		function(dir){
 					if(!dir){
 						exec('(function unbindear(){'+
@@ -1166,6 +1163,10 @@ var paginas = [
 						if(link[posActual].indexOf(caps[i].value+'/') >= 0)
 							return selcaps.selectedIndex = i;
 					return 0;
+				},
+		onerr:	function(url, img, num, pos){
+					if(num) return null;
+					return xpath('//a[@id="alt_img"]/@href', extra[pos]);
 				},
 		scrollx:'R'
 	},
@@ -1422,7 +1423,7 @@ var paginas = [
 		bgcol:	'#fff'
 	},
 	{	url:	'oglaf.com',
-		img:	'/media/comic/',
+		img:	[['#strip']],
 		back:	'div[@id="pv" or @id="pvs"]',
 		next:	'div[@id="nx"]',
 		extra:	[['//div[@id="tt"]/img']],
@@ -1549,8 +1550,7 @@ var paginas = [
 		img:	['//div[@id="comic"]/img']
 	},
 	{	url:	'*.katbox.net',
-		img:	[['#comic_image img']],
-		style:	'button{color:#000;} #wcr_div{line-height:1;}'
+		img:	[['.webcomic-image img']]
 	},
 	{	url:	'gipcomic.com',
 		img:	'/pages/',
@@ -1627,8 +1627,14 @@ var paginas = [
 	},
 	{	url:	'earthsongsaga.com',
 		img:	'../images/vol',
-		back:	['//table[2]//td[2]//a/@href'],
-		next:	['//table[2]//td[3]//a/@href'],
+		back:	function(html, pos){
+					try{ return selCss('#previous a', html); }
+					catch(e){ return xpath('//table[2]//td[2]//a/@href', html); }
+				},
+		next:	function(html, pos){
+					try{ return selCss('#next a', html); }
+					catch(e){ return xpath('//table[2]//td[3]//a/@href', html); }
+				},
 		extra:	[function(html, pos){
 					return '<img src="'+xpath('//a[starts-with(@href, "../images/vol")]/@href', html)+'"/>';
 				}],
@@ -3499,6 +3505,9 @@ var paginas = [
 				},
 		extra:	[[['div.wpm_nav']]],
 		style:	'div.wpm_nav {display:none} #wcr_extra>div.wpm_nav {display:block}'
+	},
+	{	url:	'thedevilspanties.com',
+		extra:	[['//div[@class="entry"]']],
 	}
 	/*
 	,
@@ -4367,7 +4376,7 @@ function cargarImagen(pos, dir, prof, reintento){
 	function loadFail(){
 		if(onerr){
 			reintento = reintento || 0;
-			var nueva = onerr(link[pos], imagen[pos], reintento);
+			var nueva = onerr(link[pos], imagen[pos], reintento, pos);
 			error('loadFail('+pos+','+dir+','+prof+','+reintento+') - load: '+JSON.stringify(nueva));
 			if(nueva){
 				if(nueva.img){
@@ -4551,7 +4560,12 @@ function setCol(dir, col){
 
 //manejar el tecleo
 function teclaHandler(evt){
-	if(get('wcr_settings')) return;
+	var wcr_settings = get('wcr_settings');
+	if(wcr_settings) {
+		if(evt.keyCode == 27) document.body.removeChild(wcr_settings);
+		evt.stopPropagation();
+		return;
+	}
 
 	var left = document.documentElement.scrollLeft;
 	if(!left) left = document.body.scrollLeft;
