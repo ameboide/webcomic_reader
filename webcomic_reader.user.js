@@ -416,6 +416,7 @@ var defaultSettings = {
 // @include        http://www.mankin-trad.net/*
 // @include        http://mankin-trad.net/*
 // @include        http://www.mangahere.com/*
+// @include        http://es.mangahere.com/*
 // @include        http://www.scarygoround.com/*
 // @include        http://scarygoround.com/*
 // @include        http://www.magickchicks.com/*
@@ -707,6 +708,13 @@ var defaultSettings = {
 // @include        http://www.wiemanga.com/*
 // @include        http://img.wiemanga.com/*
 // @include        http://hentai4manga.com/*
+// @include        http://bradcolbow.com/*
+// @include        http://www.gaomanga.com/*
+// @include        http://www.theherobiz.com/*
+// @include        http://guildedage.net/comic/*
+// @include        http://betweenfailures.com/*
+// @include        http://www.claudeandmonet.com/*
+// @include        http://phobia.subcultura.es/tira/*
 // ==/UserScript==
 
 //TODO
@@ -717,14 +725,6 @@ var defaultSettings = {
 // @include        http://www.demanga.com/*
 // @include        http://de.ninemanga.com/*
 // @include        http://proxer.me/*
-// @include        http://bradcolbow.com/*
-// @include        http://www.gaomanga.com/*
-// @include        http://www.theherobiz.com/*
-// @include        http://guildedage.net/comic/*
-// @include        http://es.mangahere.com/*
-// @include        http://betweenfailures.com/*
-// @include        http://www.claudeandmonet.com/*
-// @include        http://phobia.subcultura.es/tira/*
 
 var dataCache = null; //cache para no leer del disco y parsear la configuracion en cada getData
 var firstRun = false;
@@ -2128,24 +2128,23 @@ var paginas = [
 		extra:	[[['.pagination']]],
 		scrollx:'R'
 	},
-	{	url:	'mangahere.com',
+	{	url:	'*.mangahere.com',
 		img:	[['#image']],
 		back:	function(html, pos){
 					var a = selCss('.prew_page', html);
 					if(a.href.indexOf('javascript:')) return a;
-					return xpath('//strong[.="Previous Chapter:"]/following-sibling::a/@href', html) + "last.html";
+					return xpath('//strong[.="Previous Chapter:" or .="Capítulo Anterior:"]/following-sibling::a/@href', html) + "last.html";
 				},
 		next:	function(html, pos){
-					var a = selCss('.next_page', html);
-					if(a.href.indexOf('javascript:')) return a;
-					return xpath('//strong[.="Next Chapter:"]/following-sibling::a/@href', html);
+					try{ return xpath('//select[@class="wid60"]/option[@selected]/following-sibling::option[1]/@value', html); }
+					catch(e){ return xpath('//p[contains(., "es el siguiente...")]/a | //strong[.="Next Chapter:"]/following-sibling::a', html); }
 				},
 		js:		function(dir){
 					if(!dir) exec("previous_page = next_page = '';");
 					var selcap = selCss('#wcr_extra #top_chapter_list');
 					var caps = selcap.options;
 					for(var i=0; i<caps.length; i++){
-						if(!link[posActual].indexOf(caps[i].value)){
+						if(link[posActual].indexOf(caps[i].value) >= 0){
 							selcap.selectedIndex = i;
 							break;
 						}
@@ -3513,6 +3512,30 @@ var paginas = [
 		back:	[['#sub_page_left a']],
 		next:	[['#sub_page_right a']],
 		style:	'#innerWrapper, .content{width: auto !important; max-width: none !important;} .textbox > div{float: none !important;}'
+	},
+	{	url:	'bradcolbow.com',
+		img:	[['.entry img']],
+		extra:	[[['h2']], [['h5']]]
+	},
+	{	url:	'gaomanga.com',
+		img:	[['#slice0']],
+		back:	['//div[@class="pageButtonDivSelected"]/preceding-sibling::div[1]/a']
+	},
+	{	url:	'guildedage.net',
+		img:	[['#comic img']],
+		back:	[['.navi-prev']],
+		next:	[['.navi-next']]
+	},
+	{	url:	'betweenfailures.com',
+		img:	[['.webcomic-image img']]
+	},
+	{	url:	'claudeandmonet.com',
+		img:	[['.webcomic-object img']]
+	},
+	{	url:	'phobia.subcultura.es',
+		img:	[['#tira img']],
+		back:	'.="Anterior"',
+		next:	'.="Siguiente"'
 	}
 	/*
 	,
