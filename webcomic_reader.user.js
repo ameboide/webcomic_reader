@@ -42,11 +42,11 @@ var defaultSettings = {
 // ==UserScript==
 // @name           Webcomic Reader
 // @author         ameboide
-// @version        2013.04.22
+// @version        2013.04.28
 // @namespace      http://userscripts.org/scripts/show/59842
 // @description    Can work on almost any webcomic/manga page, preloads 5 or more pages ahead (or behind), navigates via ajax for instant-page-change, lets you use the keyboard, remembers your progress, and it's relatively easy to add new sites
-// @lastchanges    fixed a couple minor bugs, fixed 4 sites, added 2 more
-// @updatetype     27
+// @lastchanges    fixed a few bugs, added an option to allow changing pages while the next page is still loading, another option to set a min and max scale for the image fit feature, fixed a lot of sites, added a lot more
+// @updatetype     91
 // @grant          GM_getValue
 // @grant          GM_setValue
 // @grant          GM_deleteValue
