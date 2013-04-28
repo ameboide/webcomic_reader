@@ -163,8 +163,8 @@ var defaultSettings = {
 // @include        http://read.mangashare.com/*
 // @include        http://ani-haven.net/hr-alpha/*
 // @include        http://haven-reader.net/*
-// @include        http://www.manga2u.com/*
-// @include        http://manga2u.com/*
+// @include        http://www.manga2u.me/*
+// @include        http://manga2u.me/*
 // @include        http://buttersafe.com/*
 // @include        http://www.romanticallyapocalyptic.com/*
 // @include        http://romanticallyapocalyptic.com/*
@@ -715,16 +715,13 @@ var defaultSettings = {
 // @include        http://betweenfailures.com/*
 // @include        http://www.claudeandmonet.com/*
 // @include        http://phobia.subcultura.es/tira/*
-// ==/UserScript==
-
-//TODO
-
-//ADD:
-// @include        http://www.meinmanga.com/*
 // @include        http://www.manga-tu.be/*
-// @include        http://www.demanga.com/*
 // @include        http://de.ninemanga.com/*
 // @include        http://proxer.me/*
+// @include        http://www.demanga.com/*
+// @include        http://www.meinmanga.com/*
+// ==/UserScript==
+
 
 var dataCache = null; //cache para no leer del disco y parsear la configuracion en cada getData
 var firstRun = false;
@@ -1303,22 +1300,10 @@ var paginas = [
 		xelem:	'//div[@class="controls"]',
 		scrollx:'R'
 	},
-	{	url:	'manga2u.com',
+	{	url:	'manga2u.me|demanga.com',
 		img:	['//img[@class="manga-page"]'],
-		back:	[/var back = '(.+?)';/, 1],
-		next:	[/var next = '(.+?)';/, 1],
-		extra:	[['//div[@class="chapter-navigation"]'], '<script id="wcr_extra_script">', [/do_init_chapter_list.+\{([^\}]+)/, 1], '</script>'],
-		xelem:	'//div[@class="chapter-navigation"]',
-		js:		function(dir){
-					setEvt(xpath('//input[@id="btn-back-1"]'), 'click', btnback);
-					setEvt(xpath('//input[@id="btn-next-1"]'), 'click', btnnext);
-					try{
-						setEvt(xpath('//input[@id="btn-back-2"]'), 'click', btnback);
-						setEvt(xpath('//input[@id="btn-next-2"]'), 'click', btnnext);
-					}catch(e){}
-					exec('_fill_chapter_select();');
-					exec(get('wcr_extra_script').innerHTML);
-				},
+		back:	[/wpm_nav_pvs\s*=\s*["'](.+?)['"];/, 1],
+		next:	[/wpm_nav_nxt\s*=\s*["'](.+?)['"];/, 1],
 		scrollx:'R'
 	},
 	{	url:	'buttersafe.com',
@@ -2728,7 +2713,7 @@ var paginas = [
 				},
 		scrollx:'R'
 	},
-	{	url:	'reader.japanzai.com|reader.eternalmanga.net|sakicow.com',
+	{	url:	'reader.eternalmanga.net|sakicow.com',
 		img:	function(html, pos){
 					var num = link[pos].match(/##.*_(\d+)/);
 					num = num ? parseInt(num[1]) : 0;
@@ -2752,7 +2737,7 @@ var paginas = [
 		layelem:'//div[@id="thePic"]',
 		scrollx:'R'
 	},
-	{	url:	'foolrulez.org|manga.redhawkscans.com|mangatopia.net|simple-scans.com|mudascantrad.com|fallensyndicate.com|slide.extrascans.net|reader.fth-scans.com',
+	{	url:	'foolrulez.org|manga.redhawkscans.com|mangatopia.net|simple-scans.com|mudascantrad.com|fallensyndicate.com|slide.extrascans.net|reader.fth-scans.com|reader.japanzai.com|manga-tu.be',
 		img:	[['#page img']],
 		back:	function(html, pos){
 				try{
@@ -3394,7 +3379,8 @@ var paginas = [
 					if(!pages[idx+1]) throw 'fail';
 					return link[pos].replace(pageid, pages[idx+1]);
 				},
-		style:	'.pull-left{max-width:none !important;}'
+		style:	'.pull-left{max-width:none !important;}',
+		scrollx:'R'
 	},
 	{	url:	'webcomics.yaoi911.com',
 		img:	[['.webcomic-object img']],
@@ -3502,7 +3488,8 @@ var paginas = [
 					}
 				},
 		extra:	[[['div.wpm_nav']]],
-		style:	'div.wpm_nav {display:none} #wcr_extra>div.wpm_nav {display:block}'
+		style:	'div.wpm_nav {display:none} #wcr_extra>div.wpm_nav {display:block}',
+		scrollx:'R'
 	},
 	{	url:	'thedevilspanties.com',
 		extra:	[['//div[@class="entry"]']],
@@ -3511,7 +3498,8 @@ var paginas = [
 		img:	[['#textboxContent img']],
 		back:	[['#sub_page_left a']],
 		next:	[['#sub_page_right a']],
-		style:	'#innerWrapper, .content{width: auto !important; max-width: none !important;} .textbox > div{float: none !important;}'
+		style:	'#innerWrapper, .content{width: auto !important; max-width: none !important;} .textbox > div{float: none !important;}',
+		scrollx:'R'
 	},
 	{	url:	'bradcolbow.com',
 		img:	[['.entry img']],
@@ -3519,7 +3507,8 @@ var paginas = [
 	},
 	{	url:	'gaomanga.com',
 		img:	[['#slice0']],
-		back:	['//div[@class="pageButtonDivSelected"]/preceding-sibling::div[1]/a']
+		back:	['//div[@class="pageButtonDivSelected"]/preceding-sibling::div[1]/a'],
+		scrollx:'R'
 	},
 	{	url:	'guildedage.net',
 		img:	[['#comic img']],
@@ -3536,6 +3525,53 @@ var paginas = [
 		img:	[['#tira img']],
 		back:	'.="Anterior"',
 		next:	'.="Siguiente"'
+	},
+	{	url:	'de.ninemanga.com',
+		img:	[['.manga_pic']],
+		back:	[['.blue']],
+		next:	'.=">>"',
+		scrollx:'R'
+	},
+	{	url:	'proxer.me',
+		img:	[['.open']],
+		back:	function(html, pos){
+					var c = parseInt(match(link[pos], /[?&]c=(\d+)/, 1, 1));
+					var p = parseInt(match(link[pos], /[?&]p=(\d+)/, 1, 1)) - 1;
+					if(!p){
+						c--;
+						p=1
+					}
+					console.log([pos,-1,c,p]);
+					if(!c) throw 'inicio';
+					return link[pos].replace(/&[cp]=\d+/g, '') + '&c='+c+'&p='+p;
+				},
+		next:	function(html, pos){
+					var c = parseInt(match(link[pos], /[?&]c=(\d+)/, 1, 1));
+					var p = parseInt(match(link[pos], /[?&]p=(\d+)/, 1, 1)) + 1;
+					try { selCss('.number_'+p, html); }
+					catch(e){
+						c++;
+						p=1;
+					}
+					console.log([pos,1,c,p]);
+					return link[pos].replace(/&[cp]=\d+/g, '') + '&c='+c+'&p='+p;
+				},
+		scrollx:'R'
+	},
+	{	url:	'meinmanga.com',
+		img:	[['.pic_fragment,.pic_fragment_biggest']],
+		back:	function(html, pos){
+					try{ return xpath('//table[@class="pagebar"]//td[3]/select/option[@selected]/preceding-sibling::option[1]/@value', html) + '.html'; }
+					catch(e){ return xpath('//table[@class="pagebar"]//td[1]/select/option[@selected]/following-sibling::option[1]/@value', html); }
+				},
+		next:	function(html, pos){
+					try{ return xpath('//table[@class="pagebar"]//td[3]/select/option[@selected]/following-sibling::option[1]/@value', html) + '.html'; }
+					catch(e){ return xpath('//table[@class="pagebar"]//td[1]/select/option[@selected]/preceding-sibling::option[1]/@value', html); }
+				},
+		extra:	[[['.pic_fragment,.pic_fragment_biggest', '<br/>', 1]], '<br/>', [['.pagebar']]],
+		layelem:'//div[@class="topad"]',
+		style:	'#content > table:not(.pagebar){display:none;} .pic_fragment_biggest{margin-left:0;} #content{overflow:visible;}',
+		scrollx:'R'
 	}
 	/*
 	,
