@@ -42,11 +42,11 @@ var defaultSettings = {
 // ==UserScript==
 // @name           Webcomic Reader
 // @author         ameboide
-// @version        2013.04.28
+// @version        2013.05.02
 // @namespace      http://userscripts.org/scripts/show/59842
 // @description    Can work on almost any webcomic/manga page, preloads 5 or more pages ahead (or behind), navigates via ajax for instant-page-change, lets you use the keyboard, remembers your progress, and it's relatively easy to add new sites
-// @lastchanges    fixed a few bugs, added an option to allow changing pages while the next page is still loading, another option to set a min and max scale for the image fit feature, fixed a lot of sites, added a lot more
-// @updatetype     91
+// @lastchanges    fixed a bug with the buttons focus, fixed the url for egscans.org
+// @updatetype     19
 // @grant          GM_getValue
 // @grant          GM_setValue
 // @grant          GM_deleteValue
@@ -587,8 +587,8 @@ var defaultSettings = {
 // @include        http://www.psychopandas.com/reader/*
 // @include        http://psychopandas.com/reader/*
 // @include        http://www.ourmanga.com/*
-// @include        http://readonline.egscans.com/*
-// @include        http://read.egscans.com/*
+// @include        http://readonline.egscans.org/*
+// @include        http://read.egscans.org/*
 // @include        http://reader.eternalmanga.net/*
 // @include        http://gallery.ryuutama.com/*
 // @include        http://*.tiraecol.net/*
@@ -2819,7 +2819,7 @@ var paginas = [
 		style:	'.imgPage span{display:none !important;}',
 		scrollx:'R'
 	},
-	{	url:	'readonline.egscans.com|read.egscans.com',
+	{	url:	'readonline.egscans.org|read.egscans.org',
 		img:	function(html, pos){
 					var num = link[pos].match(/(##.*_|\/)(\d+)$/);
 					num = num ? parseInt(num[2])-1 : 0;
@@ -2858,10 +2858,10 @@ var paginas = [
 		style:	'#page_select a{display:none;} #wcr_div button{background-color:#ccc;}',
 		txtcol:	'#fff',
 		fixurl:	function(url, img, link){
-					if(link && document.location.host == 'read.egscans.com'){
+					if(link && document.location.host == 'read.egscans.org'){
 						var base = selCss('base');
-						if(base) base.href = base.href.replace('readonline.egscans.com', 'read.egscans.com');
-						return url.replace('readonline.egscans.com', 'read.egscans.com');
+						if(base) base.href = base.href.replace('readonline.egscans.org', 'read.egscans.org');
+						return url.replace('readonline.egscans.org', 'read.egscans.org');
 					}
 					return url;
 				},
@@ -4028,7 +4028,7 @@ function iniciar(){
 			prefetch(-1, -1, prefetchSizeStart[0]);
 		}
 		else{
-			get('wcr_btn-1').disabled = false;
+			disableBtn(-1, false);
 			setCol(-1, colOK);
 			imagen[-1] = null;
 		}
@@ -4216,8 +4216,8 @@ function cambiaPag(dir, poppedState, slidden){
 
 			//(des)habilito los botones segun corresponda
 			setCol(-dir, colOK);
-			if(!get('wcr_imagen'+pd) && imagen[pd]!==null) get('wcr_btn'+dir).disabled = true;
-			get('wcr_btn' + (-dir)).disabled = false;
+			if(!get('wcr_imagen'+pd) && imagen[pd]!==null) disableBtn(dir, true);
+			disableBtn(-dir, false);
 
 			var posAtras = posActual-dir*(maximgs+1);
 			var atras = get('wcr_imagen'+posAtras);
@@ -4380,7 +4380,7 @@ function prefetch(dir, pos, prof, reintento){
 	if(!link[pos]){ //link null o a si mismo, cuenta como fail
 		if(!esSgte) return; //si no es el siguiente el fallado, no faileo el boton
 		setCol(dir, colFail);
-		get('wcr_btn'+dir).disabled = true;
+		disableBtn(dir, true);
 		return;
 	}
 
@@ -4389,7 +4389,7 @@ function prefetch(dir, pos, prof, reintento){
 	prefetcheado[dir] = pos;
 
 	setCol(dir, colWait); //boton gris mientras no ha loadeado
-	if(esSgte) get('wcr_btn'+dir).disabled = true; //y si estoy loadeando el sgte, lo deshabilito
+	if(esSgte) disableBtn(dir, true); //y si estoy loadeando el sgte, lo deshabilito
 
 	var url = link[pos];
 	var meth = 'GET';
@@ -4407,9 +4407,9 @@ function prefetch(dir, pos, prof, reintento){
 				try{
 					setear(xmlhttp.responseText, pos, dir);
 
-					if(!esSgte || !imagen[pos]) get('wcr_btn'+dir).disabled = false;
+					if(!esSgte || !imagen[pos]) disableBtn(dir, false);
 					//si el otro estaba rojo no lo habilito
-					get('wcr_btn'+(-dir)).disabled = get('wcr_btn'+(-dir)).style.backgroundColor == colFail;
+					disableBtn(-dir, get('wcr_btn'+(-dir)).style.backgroundColor == colFail);
 
 					if(imagen[pos]){
 						agregarLink(pos);
@@ -4424,8 +4424,8 @@ function prefetch(dir, pos, prof, reintento){
 			else{
 				prefetcheado[dir] = pos-dir; //hago q pase de nuevo por aca
 				if(esSgte){
-					get('wcr_btn'+dir).disabled = true;
-					get('wcr_btn'+(-dir)).disabled = get('wcr_btn'+(-dir)).style.backgroundColor == colFail;
+					disableBtn(dir, true);
+					disableBtn(-dir, get('wcr_btn'+(-dir)).style.backgroundColor == colFail);
 					setCol(dir, colFail);
 				}
 				error('pre['+pos+']: status '+xmlhttp.status+' ('+url+(pars?' ; '+pars:'')+')');
@@ -4650,6 +4650,12 @@ function setCol(dir, col){
 	get('wcr_btn' + dir).style.backgroundColor = col;
 }
 
+//(des)habilita los botones back/next, y desfocusea los deshabilitados para no perder el control
+function disableBtn(dir, dis){
+	get('wcr_btn'+dir).disabled = dis;
+	if(dis) get('wcr_btn'+dir).blur();
+}
+
 //manejar el tecleo
 function teclaHandler(evt){
 	var wcr_settings = get('wcr_settings');
@@ -4818,18 +4824,18 @@ function setCursores(){
 //retorna el cursor correspondiente segun el estado de la proxima pag (y aprovecha de (des)habilitar el boton)
 function cursor(dir, elem){
 	if(!link[posActual+dir]){ //no hay link
-		get('wcr_btn'+dir).disabled = true;
+		disableBtn(dir, true);
 		return confCursor('nolink', elem, 'not-allowed');
 	}
 	if(imagen[posActual+dir]===null || imagenOK[posActual+dir]===false){ //no hay img
-		get('wcr_btn'+dir).disabled = false;
+		disableBtn(dir, false);
 		return confCursor('noimg', elem, 'pointer');
 	}
 	if(imagenOK[posActual+dir]===undefined){ //cargando img
-		get('wcr_btn'+dir).disabled = !moveWhileLoading;
+		disableBtn(dir, !moveWhileLoading);
 		return confCursor('loading', elem, 'progress');
 	}
-	get('wcr_btn'+dir).disabled = false;
+	disableBtn(dir, false);
 	return confCursor(dir>0 ? 'next' : 'back', elem, dir>0 ? 2 : 1);
 }
 
