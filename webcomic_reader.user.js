@@ -30,9 +30,9 @@ var defaultSettings = {
 		reload: {name: '.', keyCode: 190, ctrlKey: false, shiftKey: false, altKey: false},
 		set_bm: {name: 'CTRL + ALT + B', keyCode: 66, ctrlKey: true, shiftKey: false, altKey: true},
 		add_bm: {name: 'CTRL + ALT + A', keyCode: 65, ctrlKey: true, shiftKey: false, altKey: true},
-		layout: {name: '-', keyCode: isWebKit() ? 189 : 109, ctrlKey: false, shiftKey: false, altKey: false},
-		botones: {name: 'SHIFT + -', keyCode: isWebKit() ? 189 : 109, ctrlKey: false, shiftKey: true, altKey: false},
-		fit: {name: '+', keyCode: isWebKit() ? 187 : 107, ctrlKey: false, shiftKey: false, altKey: false},
+		layout: {name: '-', keyCode: isWebKit() ? 189 : 173, ctrlKey: false, shiftKey: false, altKey: false},
+		botones: {name: 'SHIFT + -', keyCode: isWebKit() ? 189 : 173, ctrlKey: false, shiftKey: true, altKey: false},
+		fit: {name: '+', keyCode: isWebKit() ? 187 : 171, ctrlKey: false, shiftKey: false, altKey: false},
 		slide: {name: 'CTRL + ALT + S', keyCode: 83, ctrlKey: true, shiftKey: false, altKey: true},
 		debug_mode: {name: 'CTRL + ALT + X', keyCode: 88, ctrlKey: true, shiftKey: false, altKey: true},
 		debug_info: {name: ',', keyCode: 188, ctrlKey: false, shiftKey: false, altKey: false}
@@ -42,11 +42,11 @@ var defaultSettings = {
 // ==UserScript==
 // @name           Webcomic Reader
 // @author         ameboide
-// @version        2013.05.02
+// @version        2013.05.04
 // @namespace      http://userscripts.org/scripts/show/59842
 // @description    Can work on almost any webcomic/manga page, preloads 5 or more pages ahead (or behind), navigates via ajax for instant-page-change, lets you use the keyboard, remembers your progress, and it's relatively easy to add new sites
-// @lastchanges    fixed a bug with the buttons focus, fixed the url for egscans.org
-// @updatetype     19
+// @lastchanges    fixed a couple bugs with the key handling, added senmanga
+// @updatetype     11
 // @grant          GM_getValue
 // @grant          GM_setValue
 // @grant          GM_deleteValue
@@ -720,6 +720,8 @@ var defaultSettings = {
 // @include        http://proxer.me/*
 // @include        http://www.demanga.com/*
 // @include        http://www.meinmanga.com/*
+// @include        http://www.senmanga.com/*
+// @include        http://raw.senmanga.com/*
 // ==/UserScript==
 
 
@@ -3572,6 +3574,24 @@ var paginas = [
 		layelem:'//div[@class="topad"]',
 		style:	'#content > table:not(.pagebar){display:none;} .pic_fragment_biggest{margin-left:0;} #content{overflow:visible;}',
 		scrollx:'R'
+	},
+	{	url:	'*.senmanga.com',
+		img:	[['#picture']],
+		back:	function(html, pos){
+					try{ return xpath('//a[.="Back"]', html); }
+					catch(e){
+						var manga = document.location.pathname.match(/^\/[^\/]+\//)[0];
+						return manga + xpath('//select[@name="chapter"]/option[@selected]/following-sibling::option[1]/@value', html);
+					}
+				},
+		next:	function(html, pos){
+					try{ return xpath('//a[.="Next"]', html); }
+					catch(e){
+						var manga = document.location.pathname.match(/^\/[^\/]+\//)[0];
+						return manga + xpath('//select[@name="chapter"]/option[@selected]/preceding-sibling::option[1]/@value', html);
+					}
+				},
+		scrollx:'R'
 	}
 	/*
 	,
@@ -4661,9 +4681,13 @@ function teclaHandler(evt){
 	var wcr_settings = get('wcr_settings');
 	if(wcr_settings) {
 		if(evt.keyCode == 27) document.body.removeChild(wcr_settings);
-		evt.stopPropagation();
+		if(tabSettingActual != 'wcr_teclas') evt.stopPropagation();
 		return;
 	}
+
+	//no toco nada si estoy escribiendo
+	if(evt.target.tagName == 'INPUT' && evt.target.type == 'text' ||
+		evt.target.tagName == 'TEXTAREA') return;
 
 	var left = document.documentElement.scrollLeft;
 	if(!left) left = document.body.scrollLeft;
@@ -4701,10 +4725,24 @@ function checkTecla(nombre, evt){
 	var ats = ['keyCode', 'ctrlKey', 'shiftKey', 'altKey'];
 	for(var i=0; i<t.length; i++){
 		var ok = true;
-		for(var a=0; a<ats.length; a++) if(t[i][ats[a]] != evt[ats[a]]) ok = false;
+		for(var a=0; a<ats.length; a++){
+			if(t[i][ats[a]] != evt[ats[a]]){
+				if(ats[a] == 'keyCode'){
+					//- y + en chrome, ff15+ y ff14-
+					if(mismaTecla([189, 173, 109], t[i], evt) || mismaTecla([189, 173, 109], t[i], evt)) continue;
+				}
+				ok = false;
+				break;
+			}
+		}
 		if(ok) return true;
 	}
 	return false;
+}
+
+//compara distintos keycodes para una misma tecla xq los browsers no tienen xq estar de acuerdo con lo que piensan
+function mismaTecla(eqs, t, e){
+	return eqs.indexOf(parseInt(t.keyCode)) >= 0 && eqs.indexOf(parseInt(e.keyCode)) >= 0;
 }
 
 //alert con url y img.src de las primeras pags, las alrededor de la actual, y las ultimas
@@ -5221,7 +5259,7 @@ function nombreTecla(evt){
 		222: 'QUOTE',
 		224: 'META'
 	};
-	return pre + (kc[evt.keyCode] || ('??? ('+code+')'));
+	return pre + (kc[evt.keyCode] || ('??? ('+evt.keyCode+')'));
 }
 
 //un solo menu q abre la pantalla de configuracion con todas las opciones
@@ -6834,7 +6872,7 @@ function mostrarSettingsZoom(){
 			}
 			document.body.removeChild(divsets);
 			fitImagen();
-			scroll();
+			scrollear();
 		});
 
 		setEvt('wcr_set_btn_disable', 'click', function(){
