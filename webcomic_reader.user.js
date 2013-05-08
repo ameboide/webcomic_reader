@@ -42,11 +42,11 @@ var defaultSettings = {
 // ==UserScript==
 // @name           Webcomic Reader
 // @author         ameboide
-// @version        2013.05.04
+// @version        2013.05.08
 // @namespace      http://userscripts.org/scripts/show/59842
 // @description    Can work on almost any webcomic/manga page, preloads 5 or more pages ahead (or behind), navigates via ajax for instant-page-change, lets you use the keyboard, remembers your progress, and it's relatively easy to add new sites
-// @lastchanges    fixed a couple bugs with the key handling, added senmanga
-// @updatetype     11
+// @lastchanges    added 3 new sites
+// @updatetype     8
 // @grant          GM_getValue
 // @grant          GM_setValue
 // @grant          GM_deleteValue
@@ -722,8 +722,10 @@ var defaultSettings = {
 // @include        http://www.meinmanga.com/*
 // @include        http://www.senmanga.com/*
 // @include        http://raw.senmanga.com/*
+// @include        http://www.mangaesta.net/*
+// @include        http://www.mabuns.web.id/*
+// @include        http://www.manga4indo.com/*
 // ==/UserScript==
-
 
 var dataCache = null; //cache para no leer del disco y parsear la configuracion en cada getData
 var firstRun = false;
@@ -3592,6 +3594,25 @@ var paginas = [
 					}
 				},
 		scrollx:'R'
+	},
+	{	url:	'mangaesta.net|www.mabuns.web.id|manga4indo.com',
+		img:	function(html, pos){
+					var page = match(link[pos], /page=(\d+)$/, 1, 1);
+					var pages = html.match(/addpage\('(.+)?'.*\)/g);
+					return pages[page-1].match(/'(.+?)'/)[1];
+				},
+		back:	function(html, pos){
+					var page = match(link[pos], /page=(\d+)$/, 1, 1);
+					if(--page) return link[pos].replace(/(##page=\d+)?$/, '##page='+page);
+					throw 'first';
+				},
+		next:	function(html, pos){
+					var page = match(link[pos], /page=(\d+)$/, 1, 1);
+					var pages = html.match(/addpage\('(.+)?'.*\)/g);
+					if(++page <= pages.length) return link[pos].replace(/(##page=\d+)?$/, '##page='+page);
+					throw 'last';
+				},
+		layelem:'//span[@id="page"]'
 	}
 	/*
 	,
@@ -5691,7 +5712,7 @@ function mostrarSettings(){
 					'1':'Enabled'
 				}
 			},
-			moveWhileLoading:{ desc: 'Move while loading', title: 'Lets you move to the next or previous page before the image for that page has finished loading',
+			moveWhileLoading:{ desc: 'Force loading next page', title: 'Lets you move to the next or previous page before the image for that page has finished loading',
 				def: defaultSettings.moveWhileLoading ? '1' : '0',
 				vals:{
 					'0':'Disabled',
