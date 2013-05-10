@@ -42,11 +42,11 @@ var defaultSettings = {
 // ==UserScript==
 // @name           Webcomic Reader
 // @author         ameboide
-// @version        2013.05.08
+// @version        2013.05.10
 // @namespace      http://userscripts.org/scripts/show/59842
 // @description    Can work on almost any webcomic/manga page, preloads 5 or more pages ahead (or behind), navigates via ajax for instant-page-change, lets you use the keyboard, remembers your progress, and it's relatively easy to add new sites
-// @lastchanges    added 3 new sites
-// @updatetype     8
+// @lastchanges    added 3 new sites, fixed another
+// @updatetype     24
 // @grant          GM_getValue
 // @grant          GM_setValue
 // @grant          GM_deleteValue
@@ -2943,6 +2943,9 @@ var paginas = [
 		img:	[['#image']],
 		back:	[/value="Prev Page" onclick="window.location.href='([^']+)'"/, 1],
 		next:	[/value="Next Page" onclick="window.location.href='([^']+)'"/, 1],
+		js:		function(dir){
+					exec('window.removeEventListener("keydown", handleKey, true)');
+				},
 		scrollx:'R',
 		extra:	[[['div#viewerHeader>div', '']], '<div class="clear"></div>', [['div#file_dropdown_top', '']], [['div#page_dropdown_top']], [['div#reportLink']], [['div#image_display div']]],
 		xelem:	'//div[@id="viewerHeader"]',
