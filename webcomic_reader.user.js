@@ -42,11 +42,11 @@ var defaultSettings = {
 // ==UserScript==
 // @name           Webcomic Reader
 // @author         ameboide
-// @version        2013.05.10
+// @version        2013.05.15
 // @namespace      http://userscripts.org/scripts/show/59842
 // @description    Can work on almost any webcomic/manga page, preloads 5 or more pages ahead (or behind), navigates via ajax for instant-page-change, lets you use the keyboard, remembers your progress, and it's relatively easy to add new sites
-// @lastchanges    added 3 new sites, fixed another
-// @updatetype     24
+// @lastchanges    added 3 new sites, improved memory usage
+// @updatetype     11
 // @grant          GM_getValue
 // @grant          GM_setValue
 // @grant          GM_deleteValue
@@ -655,6 +655,8 @@ var defaultSettings = {
 // @include        http://www.irregularwebcomic.net/*
 // @include        http://adistantsoil.com/*
 // @include        http://comic.nodwick.com/*
+// @include        http://ffn.nodwick.com/*
+// @include        http://ps238.nodwick.com/*
 // @include        http://kronos.mcanime.net/*
 // @include        http://www.ghastlycomic.com/*
 // @include        http://thedevilspanties.com/*
@@ -725,6 +727,7 @@ var defaultSettings = {
 // @include        http://www.mangaesta.net/*
 // @include        http://www.mabuns.web.id/*
 // @include        http://www.manga4indo.com/*
+// @include        http://www.bloomingfaeries.com/*
 // ==/UserScript==
 
 var dataCache = null; //cache para no leer del disco y parsear la configuracion en cada getData
@@ -788,7 +791,10 @@ var goToBookmark = confBool('goToBookmark', defaultSettings.goToBookmark);
 var useHistoryAPI = confBool('useHistoryAPI', true);
 var moveWhileLoading = confBool('moveWhileLoading', defaultSettings.moveWhileLoading);
 
-var maximgs = Math.max(23, prefetchSize[1], prefetchSize[0]); //mantener solo este num de imagenes cargadas atras y adelante de la actual (2n+1) para no comer memoria
+var maximgs = []; //mantener solo este num de imagenes cargadas atras y adelante de la actual para no comer memoria
+maximgs[1] = Math.max(23, prefetchSize[1]);
+maximgs[-1] = Math.max(23, prefetchSize[0]);
+
 var usarb64 = confBool('b64_images', false);
 
 /* paginas[i] = {
@@ -3616,6 +3622,9 @@ var paginas = [
 					throw 'last';
 				},
 		layelem:'//span[@id="page"]'
+	},
+	{	url:	'bloomingfaeries.com',
+		img:	[['#comic img']]
 	}
 	/*
 	,
@@ -4263,13 +4272,13 @@ function cambiaPag(dir, poppedState, slidden){
 			if(!get('wcr_imagen'+pd) && imagen[pd]!==null) disableBtn(dir, true);
 			disableBtn(-dir, false);
 
-			var posAtras = posActual-dir*(maximgs+1);
+			var posAtras = posActual-dir*(maximgs[-dir]+1);
 			var atras = get('wcr_imagen'+posAtras);
 			if(atras){
 				atras.parentNode.removeChild(atras);
 				imagen64[posAtras] = null;
 			}
-			var adelante = posActual+dir*maximgs;
+			var adelante = posActual+dir*maximgs[dir];
 			if(imagen[adelante] && !get('wcr_imagen'+adelante)){
 				cargarImagen(adelante);
 			}
