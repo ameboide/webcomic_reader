@@ -1571,27 +1571,27 @@ var paginas = [
 	},
 	{	url:	'fakku.net',
 		img:	function(html, pos){
-					var data = JSON.parse(html.match(/var data\s*=\s*(.+);/)[1]);
+					var thumbs = JSON.parse(match(html, /params\.thumbs\s*=\s*(.+);/, 1));
 					var x = link[0].match(/page=(\d+)/);
 					x = Number(x ? x[1] : 0)+pos;
 					if(!x) return '.';
-					if(x<0 || x>data.thumbs.length) throw 'fail';
+					if(x<0 || x>thumbs.length) throw 'fail';
 					x = x.toString();
 					while(x.length<3) x='0'+x;
 					return html.match(/'([^']+\/c\/manga\/[^']+)'/)[1] + x + '.jpg'; 
 				},
 		back:	function(html, pos){
-					var data = JSON.parse(html.match(/var data\s*=\s*(.+);/)[1]);
+					var thumbs = JSON.parse(match(html, /params\.thumbs\s*=\s*(.+);/, 1));
 					var x = link[0].match(/page=(\d+)/);
 					x = Number(x ? x[1] : 0)+pos-1;
-					if(x<0 || x>data.thumbs.length) throw 'fail';
+					if(x<0 || x>thumbs.length) throw 'fail';
 					return link[0].replace(/#.+/, '')+'##page='+x;
 				},
 		next:	function(html, pos){
-					var data = JSON.parse(html.match(/var data\s*=\s*(.+);/)[1]);
+					var thumbs = JSON.parse(match(html, /params\.thumbs\s*=\s*(.+);/, 1));
 					var x = link[0].match(/page=(\d+)/);
 					x = Number(x ? x[1] : 0)+pos+1;
-					if(x<0 || x>data.thumbs.length) throw 'fail';
+					if(x<0 || x>thumbs.length) throw 'fail';
 					return link[0].replace(/#.+/, '')+'##page='+x;
 				},
 		js:		function(dir){
