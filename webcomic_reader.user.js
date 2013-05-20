@@ -161,7 +161,6 @@ var defaultSettings = {
 // @include        http://www.unshelved.com/*
 // @include        https://www.eviscerati.org/comics*
 // @include        http://read.mangashare.com/*
-// @include        http://ani-haven.net/hr-alpha/*
 // @include        http://haven-reader.net/*
 // @include        http://www.manga2u.me/*
 // @include        http://manga2u.me/*
@@ -1284,20 +1283,26 @@ var paginas = [
 		back:	[['.previous a']],
 		next:	[['.next a']]
 	},
-	{	url:	'ani-haven.net|haven-reader.net',
-		back:	'img[@class="prev-btn"]',
-		next:	'img[@class="next-btn"]',
-		extra:	[['//div[@id="series-list"]/*'], ['//div[@id="ch-list"]/*'], ['//div[@id="page-list"]/*']],
-		style:	'#wcr_extra form, .selectbox{display:inline}',
+	{	url:	'haven-reader.net',
+		img:	[['#mangaPage img']],
+		back:	function(html, pos){
+					var series = selCss('[name=series]', html).value;
+					var chapter = selCss('[name=chapter]', html).value;
+					var page = xpath('//select[@name="page"]/option[@selected]/preceding-sibling::option[1]/@value', html);
+					return '?mode=view&series='+series+'&chapter='+chapter+'&page='+(page != '0' ? page : '1&prev');
+				},
+		next:	function(html, pos){
+					var series = selCss('[name=series]', html).value;
+					var chapter = selCss('[name=chapter]', html).value;
+					try{ var page = xpath('//select[@name="page"]/option[@selected]/following-sibling::option[1]/@value', html); }
+					catch(e){ var page = selCss('[name=page] [selected]', html).value + '&next'; }
+					return '?mode=view&series='+series+'&chapter='+chapter+'&page='+page;
+				},
+		extra:	['<form name="navigate">', [['.series_name']], [['.chapter_number']], [['.page']], '</form>'],
 		js:		function(dir){
-					if(!dir && !keepLayout) return;
-					//activar los selects de serie/cap/pag
-					var scripts = document.getElementsByTagName('script');
-					for(var i=0;i<scripts.length;i++){
-						var ready = scripts[i].innerHTML.match(/\.ready\(.+\{\n([\s\S]+?#[\s\S]+?)\n\}\);/);
-						if(!ready) continue;
-						exec(ready[1].replace(/#/g, '#wcr_extra #'));
-						break;
+					if(!dir){
+						var form = selCss('form[name=navigate][method]');
+						form.parentNode.removeChild(form);
 					}
 				},
 		scrollx:'R'
