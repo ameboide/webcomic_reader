@@ -2848,8 +2848,11 @@ var paginas = [
 					var num = link[pos].match(/(##.*_|\/)(\d+)$/);
 					num = num ? parseInt(num[2])-1 : 0;
 					if(!num){
-						var base = html.match(/var prev_chap = '(.+)';/)[1]+'/1';
-						num = 1;
+						var base = html.match(/var prev_chap = '(.+)';/)[1] + '/';
+ 						if(!/^https?:\/\//i.test(base)) base = xpath('//base/@href', html) + base;
+						var htmlPrev = syncRequest(base, pos);
+						num = parseInt(htmlPrev.match(/var page_max = parseInt\('(\d+)'\);/)[1]);
+						base += num + '/';
 					}
 					else{
 						var selpag = selCss('[name="page"]', html);
@@ -2873,7 +2876,8 @@ var paginas = [
 					}
 					return base+'##'+(pos+1)+'_'+num;
 				},
-		extra:	[[['.pager']]],
+		extra:	[[['.pager>*', '']]],
+		xelem:	'//div[@class="pager"]',
 		style:	'#page_select a{display:none;} #wcr_div button{background-color:#ccc;}',
 		txtcol:	'#fff',
 		fixurl:	function(url, img, link){
