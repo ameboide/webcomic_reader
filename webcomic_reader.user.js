@@ -2848,8 +2848,7 @@ var paginas = [
 					var num = link[pos].match(/(##.*_|\/)(\d+)$/);
 					num = num ? parseInt(num[2])-1 : 0;
 					if(!num){
-						var base = html.match(/var prev_chap = '(.+)';/)[1] + '/';
- 						if(!/^https?:\/\//i.test(base)) base = xpath('//base/@href', html) + base;
+						var base = '/' + html.match(/var prev_chap = '(.+)';/)[1] + '/';
 						var htmlPrev = syncRequest(base, pos);
 						num = parseInt(htmlPrev.match(/var page_max = parseInt\('(\d+)'\);/)[1]);
 						base += num + '/';
