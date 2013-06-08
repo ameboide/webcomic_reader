@@ -3363,20 +3363,20 @@ var paginas = [
 	{	url:	'm.hentai2read.com',
 		img:	[['.prw img']],
 		back:	function(html, pos){
-					var baseurl = xpath('(//select[@class="cbo_wpm_chp"])/@onchange', html).replace(/^.*?'|'.*$/gi, '');
+					var baseurl = xpath('//select[@class="cbo_wpm_chp"]/@onchange', html).replace(/^.*?'|'.*$/gi, '');
 					try{
-						var pag = xpath('(//select[@class="cbo_wpm_pag"])/option[@selected]/preceding-sibling::option[1]/@value', html);
+						var pag = xpath('//select[@class="cbo_wpm_pag"]/option[@selected]/preceding-sibling::option[1]/@value', html);
 						var chap = selCss('select.cbo_wpm_chp > option[selected]', html).value;
 						return baseurl + chap +'/' + pag + '/';
 					}
 					catch(e){
-						var chap = xpath('(//select[@class="cbo_wpm_chp"])/option[@selected]/following-sibling::option[1]/@value', html);
+						var chap = xpath('//select[@class="cbo_wpm_chp"]/option[@selected]/following-sibling::option[1]/@value', html);
 						var htmlPrev = syncRequest(baseurl + chap +'/', pos);
-						var pag = xpath('(//select[@class="cbo_wpm_pag"])/option[last()]/@value', htmlPrev);
+						var pag = xpath('//select[@class="cbo_wpm_pag"]/option[last()]/@value', htmlPrev);
 						return baseurl + chap +'/' + pag + '/';
 					}
 				},
-		next:	['//img[@class="cmd" and @alt="Next Page"]/..[starts-with(@href,"http")]'],
+		next:	['//img[contains(concat(" ",@class," ")," cmd ") and @alt="Next Page" and starts-with(../@href,"http")]/..'],
 		extra:	['<span style="float:left">Chapter ', [['.cbo_wpm_chp']], '</span><span style="float:right">Page ', [['.cbo_wpm_pag']], '</span><span class="clr"></span>'],
 		style:	'.header{position:relative;} .content-box{padding-top:20px;} #wcr_imagen{max-width:none;} .prw{overflow:visible !important;} div.wpm_nav{display:none}',
 		scrollx:'R'
