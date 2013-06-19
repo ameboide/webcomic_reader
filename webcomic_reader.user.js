@@ -74,6 +74,7 @@ var defaultSettings = {
 // @include        http://www.nuklearpower.com/*
 // @include        http://www.reallifecomics.com/*
 // @include        http://reallifecomics.com/*
+// @include        http://www.pvponline.com/*
 // @include        http://pvponline.com/*
 // @include        http://www.brawlinthefamily.com/*
 // @include        http://drmcninja.com/*
@@ -122,8 +123,6 @@ var defaultSettings = {
 // @include        http://www.sinfest.net/*
 // @include        http://www.crfh.net/*
 // @include        http://crfh.net/*
-// @include        http://www.eeriecuties.com/*
-// @include        http://www.menagea3.net/*
 // @include        http://www.pennyandaggie.com/*
 // @include        http://pennyandaggie.com/*
 // @include        http://www.darkbolt.com/*
@@ -418,7 +417,6 @@ var defaultSettings = {
 // @include        http://es.mangahere.com/*
 // @include        http://www.scarygoround.com/*
 // @include        http://scarygoround.com/*
-// @include        http://www.magickchicks.com/*
 // @include        http://www.schlockmercenary.com/*
 // @include        http://www.warehousecomic.com/*
 // @include        http://warehousecomic.com/*
@@ -729,6 +727,12 @@ var defaultSettings = {
 // @include        http://www.manga4indo.com/*
 // @include        http://www.bloomingfaeries.com/*
 // @include        http://www.friendshipscans.com/*
+// @include        http://neechan.net/*
+// @include        http://www.komikid.com/*
+// @include        http://komikid.com/*
+// @include        http://blog.komikid.com/*
+// @include        http://www.findchaos.com/*
+// @include        http://chaoslife.findchaos.com/*
 // ==/UserScript==
 
 var dataCache = null; //cache para no leer del disco y parsear la configuracion en cada getData
@@ -1094,10 +1098,9 @@ var paginas = [
 				},
 		extra:	[[['#comic-1 #comic-short']],
 				function(html, pos){
-					var href = xpath('//a[contains(./img/@src, "ASPeasteregg.png")]/@href', html);
-					var img = href.replace(/^.+(\d{2})(\d{2})(\d{4}).*$/,
-						'<img src="/hc/comics/$3-$1-$2.jpg" />');
-					return img + img.replace('.jpg', '.gif');
+					var href = selCss('#question a', html).href;
+					var htmlHidden = syncRequest(href, pos);
+					return contenido(htmlHidden, [['#comic > *', '']]);
 				}, [['.post']]],
 		layelem:'//div[@id="comic-1"]'
 	},
@@ -3658,10 +3661,33 @@ var paginas = [
 					if(++page <= pages.length) return link[pos].replace(/(##page=\d+)?$/, '##page='+page);
 					throw 'last';
 				},
-		layelem:'//span[@id="page"]'
+		layelem:'//span[@id="page"]',
+		scrollx:'R'
 	},
 	{	url:	'bloomingfaeries.com',
 		img:	[['#comic img']]
+	},
+	{	url:	'neechan.net',
+		img:	[['.prw img']],
+		scrollx:'R'
+	},
+	{	url:	'*.komikid.com',
+		img:	[['td>a>img']],
+		back:	function(html, pos){
+					try{ return xpath('//a[img[@title="Previous Page"]]', html); }
+					catch(e){
+						var chapter = xpath('//select[@name="chapter"]/option[@selected]/following-sibling::option[1]/@value', html);
+						return link[pos].replace(/(\/\/([^\/]+\/){2}).*/, '$1' + chapter);
+	}
+				},
+		next:	function(html, pos){
+					try{ return xpath('//a[img[@title="Next Page"]]', html); }
+					catch(e){
+						var chapter = xpath('//select[@name="chapter"]/option[@selected]/preceding-sibling::option[1]/@value', html);
+						return link[pos].replace(/(\/\/([^\/]+\/){2}).*/, '$1' + chapter);
+					}
+				},
+		scrollx:'R'
 	}
 	/*
 	,
