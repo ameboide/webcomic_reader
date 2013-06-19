@@ -687,6 +687,7 @@ var defaultSettings = {
 // @include        http://zenpencils.com/*
 // @include        http://wootmanga.com/*
 // @include        http://hentai2read.com/*
+// @include        http://m.hentai2read.com/*
 // @include        http://komikmy.com/*/*/*
 // @include        http://www.hentaifr.net/doujinshisheng.php*
 // @include        http://www.sientoymiento.cl/*
@@ -727,6 +728,7 @@ var defaultSettings = {
 // @include        http://www.mabuns.web.id/*
 // @include        http://www.manga4indo.com/*
 // @include        http://www.bloomingfaeries.com/*
+// @include        http://www.friendshipscans.com/*
 // ==/UserScript==
 
 var dataCache = null; //cache para no leer del disco y parsear la configuracion en cada getData
@@ -2752,11 +2754,12 @@ var paginas = [
 		layelem:'//div[@id="thePic"]',
 		scrollx:'R'
 	},
-	{	url:	'foolrulez.org|manga.redhawkscans.com|mangatopia.net|simple-scans.com|mudascantrad.com|fallensyndicate.com|slide.extrascans.net|reader.fth-scans.com|reader.japanzai.com|manga-tu.be',
+	{	url:	'foolrulez.org|manga.redhawkscans.com|mangatopia.net|simple-scans.com|mudascantrad.com|fallensyndicate.com|slide.extrascans.net|reader.fth-scans.com|reader.japanzai.com|manga-tu.be|friendshipscans.com',
 		img:	[['#page img']],
 		back:	function(html, pos){
 				try{
 					var relpath = xpath('//div[@class="topbar_right"]/span[@class="numbers"]/div[contains(concat(" ",@class," ")," current_page ")]/following-sibling::div[1]//@href', html);
+					if (relpath.match(/^http/i)) return relpath;
 					var basepath = "";
 					try{ basepath = html.match(/var\s+baseurl\s*=\s*(['"])(.*?)\1\s*;/i)[2]; }
 					catch(e){}
@@ -2776,6 +2779,7 @@ var paginas = [
 		next:	function(html, pos){
 				try{
 					var relpath = xpath('//div[@class="topbar_right"]/span[@class="numbers"]/div[contains(concat(" ",@class," ")," current_page ")]/preceding-sibling::div[1]//@href', html);
+					if (relpath.match(/^http/i)) return relpath;
 					var basepath = "";
 					try{ basepath = html.match(/var\s+baseurl\s*=\s*(['"])(.*?)\1\s*;/i)[2]; }
 					catch(e){}
@@ -2844,8 +2848,10 @@ var paginas = [
 					var num = link[pos].match(/(##.*_|\/)(\d+)$/);
 					num = num ? parseInt(num[2])-1 : 0;
 					if(!num){
-						var base = html.match(/var prev_chap = '(.+)';/)[1]+'/1';
-						num = 1;
+						var base = '/' + html.match(/var prev_chap = '(.+)';/)[1] + '/';
+						var htmlPrev = syncRequest(base, pos);
+						num = parseInt(htmlPrev.match(/var page_max = parseInt\('(\d+)'\);/)[1]);
+						base += num + '/';
 					}
 					else{
 						var selpag = selCss('[name="page"]', html);
@@ -2869,7 +2875,8 @@ var paginas = [
 					}
 					return base+'##'+(pos+1)+'_'+num;
 				},
-		extra:	[[['.pager']]],
+		extra:	[[['.pager>*', '']]],
+		xelem:	'//div[@class="pager"]',
 		style:	'#page_select a{display:none;} #wcr_div button{background-color:#ccc;}',
 		txtcol:	'#fff',
 		fixurl:	function(url, img, link){
@@ -3347,6 +3354,31 @@ var paginas = [
 		next:	['//div[@class="wpm_seo"]/a[.="Next" and not(@href="")]'],
 		extra:	[[['.wpm_nav']]],
 		style:	'#wcr_imagen{max-width:none;} .prw{overflow:visible !important;} div.wpm_nav{display:none} #wcr_extra>div.wpm_nav{display:block}',
+		fixurl:	function(url, img, link) {
+			if (link) return url.replace('m.hentai2read.com', 'hentai2read.com');
+			return url;
+		},
+		scrollx:'R'
+	},
+	{	url:	'm.hentai2read.com',
+		img:	[['.prw img']],
+		back:	function(html, pos){
+					var baseurl = xpath('//select[@class="cbo_wpm_chp"]/@onchange', html).replace(/^.*?'|'.*$/gi, '');
+					try{
+						var pag = xpath('//select[@class="cbo_wpm_pag"]/option[@selected]/preceding-sibling::option[1]/@value', html);
+						var chap = selCss('select.cbo_wpm_chp > option[selected]', html).value;
+						return baseurl + chap +'/' + pag + '/';
+					}
+					catch(e){
+						var chap = xpath('//select[@class="cbo_wpm_chp"]/option[@selected]/following-sibling::option[1]/@value', html);
+						var htmlPrev = syncRequest(baseurl + chap +'/', pos);
+						var pag = xpath('//select[@class="cbo_wpm_pag"]/option[last()]/@value', htmlPrev);
+						return baseurl + chap +'/' + pag + '/';
+					}
+				},
+		next:	['//img[contains(concat(" ",@class," ")," cmd ") and @alt="Next Page" and starts-with(../@href,"http")]/..'],
+		extra:	['<span style="float:left">Chapter ', [['.cbo_wpm_chp']], '</span><span style="float:right">Page ', [['.cbo_wpm_pag']], '</span><span class="clr"></span>'],
+		style:	'.header{position:relative;} .content-box{padding-top:20px;} #wcr_imagen{max-width:none;} .prw{overflow:visible !important;} div.wpm_nav{display:none}',
 		scrollx:'R'
 	},
 	{	url:	'komikmy.com',
