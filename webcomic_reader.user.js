@@ -733,6 +733,9 @@ var defaultSettings = {
 // @include        http://blog.komikid.com/*
 // @include        http://www.findchaos.com/*
 // @include        http://chaoslife.findchaos.com/*
+// @include        http://moonoverjune.com/*
+// @include        http://www.shadbase.com/*
+// @include        http://www.shagbase.com/*
 // ==/UserScript==
 
 var dataCache = null; //cache para no leer del disco y parsear la configuracion en cada getData
@@ -3627,7 +3630,10 @@ var paginas = [
 		scrollx:'R'
 	},
 	{	url:	'*.senmanga.com',
-		img:	[['#picture']],
+		img:	function(html, pos){
+					try{ match(html, /img\.src *= *'([^\']+)'/, 1); }
+					catch(e){ return selCss('#picture', html); }
+				},
 		back:	function(html, pos){
 					try{ return xpath('//a[.="Back"]', html); }
 					catch(e){
@@ -3688,6 +3694,13 @@ var paginas = [
 					}
 				},
 		scrollx:'R'
+	},
+	{	url:	'moonoverjune.com',
+		img:	[['.comicpage']]
+	},
+	{	url:	'shadbase.com|shagbase.com',
+		img:	[['#comic img']],
+		extra:	[['//div[@id="comic-1" and not(img)]'], [['#comic .comicpane', '', 1]]]
 	}
 	/*
 	,
