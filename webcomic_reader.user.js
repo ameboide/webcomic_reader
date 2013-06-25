@@ -876,10 +876,12 @@ var paginas = [
 		bgcol:	'#fff'
 	},
 	{	url:	'dilbert.com',
-		img:	[['.STR_Image img']],
+		img:	[['.STR_Image img, .LGT_Date ~ img']],
+		back:	[['.STR_Prev, .LGT_Date a:nth-of-type(1)']],
+		next:	[['.STR_Next, .LGT_Date a:nth-of-type(2)']],
 		fixurl:	function(url, img, link){
-					if (img && !keepLayout) {
-						url = url.replace('.sunday.gif', '.gif').replace('.gif', '.zoom.gif');
+					if (img && (!keepLayout || document.location.href.indexOf('/fast/') > 0)) {
+						url = url.replace(/\.(sunday|print)\.gif/, '.gif').replace('.gif', '.zoom.gif');
 					}
 					return url;
 				}
@@ -3701,6 +3703,10 @@ var paginas = [
 	{	url:	'shadbase.com|shagbase.com',
 		img:	[['#comic img']],
 		extra:	[['//div[@id="comic-1" and not(img)]'], [['#comic .comicpane', '', 1]]]
+	},
+	{	url:	'mangago.com',
+		img:	[['#page1']],
+		scrollx:'R'
 	}
 	/*
 	,
