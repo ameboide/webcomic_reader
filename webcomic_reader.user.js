@@ -736,6 +736,9 @@ var defaultSettings = {
 // @include        http://moonoverjune.com/*
 // @include        http://www.shadbase.com/*
 // @include        http://www.shagbase.com/*
+// @include        http://www.mrlovenstein.com/*
+// @include        http://www.anticscomic.com/*
+// @include        http://octopuns.blogspot.com/*
 // ==/UserScript==
 
 var dataCache = null; //cache para no leer del disco y parsear la configuracion en cada getData
@@ -3707,6 +3710,22 @@ var paginas = [
 	{	url:	'mangago.com',
 		img:	[['#page1']],
 		scrollx:'R'
+	},
+	{	url:	'mrlovenstein.com',
+		img:	[['#comic_main_image']]
+	},
+	{	url:	'anticscomic.com',
+		img:	[['#comic img']]
+	},
+	{	url:	'octopuns.blogspot.com',
+		img:	[['.post-body img']],
+		back:	'img[contains(@src,"Back.png")]',
+		next:	'img[contains(@src,"Next.png")]',
+		extra:	[['//div[contains(@class, "post-body")]/*[not(@class="separator") or contains(@style, "text-align: left")] | //div[contains(@class, "post-body")]/text()', '']],
+		fixurl:	function(url, img, link){
+					if(link) return url.replace('.com.au/', '.com/');
+					return url;
+				}
 	}
 	/*
 	,
