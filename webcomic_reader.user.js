@@ -42,11 +42,11 @@ var defaultSettings = {
 // ==UserScript==
 // @name           Webcomic Reader
 // @author         ameboide
-// @version        2013.06.22
+// @version        2013.07.02
 // @namespace      http://userscripts.org/scripts/show/59842
 // @description    Can work on almost any webcomic/manga page, preloads 5 or more pages ahead (or behind), navigates via ajax for instant-page-change, lets you use the keyboard, remembers your progress, and it's relatively easy to add new sites
-// @lastchanges    fixed 8 sites, added 8 more
-// @updatetype     11
+// @lastchanges    fixed 3 sites, added 3 more
+// @updatetype     24
 // @grant          GM_getValue
 // @grant          GM_setValue
 // @grant          GM_deleteValue
@@ -3705,7 +3705,8 @@ var paginas = [
 	},
 	{	url:	'shadbase.com|shagbase.com',
 		img:	[['#comic img']],
-		extra:	[['//div[@id="comic-1" and not(img)]'], [['#comic .comicpane', '', 1]]]
+		extra:	[['//div[@id="comic-1" and not(img)]'], [['#comic .comicpane', '', 1]]],
+		layelem:'//div[@id="comic"]'
 	},
 	{	url:	'mangago.com',
 		img:	[['#page1']],
