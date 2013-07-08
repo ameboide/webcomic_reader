@@ -739,6 +739,8 @@ var defaultSettings = {
 // @include        http://www.mrlovenstein.com/*
 // @include        http://www.anticscomic.com/*
 // @include        http://octopuns.blogspot.com/*
+// @include        http://www.onemanga.me/*
+// @include        http://mngacow.com/*
 // ==/UserScript==
 
 var dataCache = null; //cache para no leer del disco y parsear la configuracion en cada getData
@@ -960,22 +962,8 @@ var paginas = [
 		bgcol:	'#334255'
 	},
 	{	url:	'mangastream.com',
-		img:	[['#p']],
-		back:	function(html, pos){
-					try{ return xpath('//a[.="« Prev" and not(starts-with(@href, "javascript:"))]', html); }
-					catch(e){
-						var url = xpath('//div[@id="top"]//option[contains("'+link[pos]+'", @value) and not(@value="/")]/following-sibling::option[1]/@value', html);
-						var htmlPrev = syncRequest(url, pos);
-						return xpath('//a[.="Next »"]/preceding-sibling::a[1]', htmlPrev);
-					}
-				},
-		next:	function(html, pos){
-					try{ return xpath('//a[.="Next »" and not(contains(@href, "/end"))]', html); }
-					catch(e){
-						var chap = link[pos].match(/read\/[^\/]+\/([^\/]+)/)[1];
-						return xpath('//div[@id="top"]//option[contains(@value, "'+chap+'") and not(@value="/")]/preceding-sibling::option[1]/@value', html);
-					}
-				},
+		img:	[['#manga-page']],
+		style:	'.subnav[style*="fixed"]{display: none;}',
 		scrollx:'R',
 		layout:	true
 	},
@@ -3713,7 +3701,8 @@ var paginas = [
 		scrollx:'R'
 	},
 	{	url:	'mrlovenstein.com',
-		img:	[['#comic_main_image']]
+		img:	[['.comic_image div img']],
+		layelem:'//div[@class="comic_image"]'
 	},
 	{	url:	'anticscomic.com',
 		img:	[['#comic img']]
@@ -3727,6 +3716,14 @@ var paginas = [
 					if(link) return url.replace('.com.au/', '.com/');
 					return url;
 				}
+	},
+	{	url:	'onemanga.me',
+		img:	[['.manga-page']],
+		scrollx:'R'
+	},
+	{	url:	'mngacow.com',
+		img:	[['.prw a img']],
+		scrollx:'R'
 	}
 	/*
 	,
