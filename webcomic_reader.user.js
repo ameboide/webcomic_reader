@@ -88,6 +88,7 @@ var defaultSettings = {
 // @include        http://es.juanelo.net/*/*
 // @include        http://www.mangastream.com/*
 // @include        http://mangastream.com/*
+// @include        http://readms.com/*
 // @include        http://www.qwantz.com/*
 // @include        http://qwantz.com/*
 // @include        http://www.2pstart.com/*/*
@@ -915,9 +916,9 @@ var paginas = [
 		extra:	[['//title/text()'], ' - ', ['//td/font/i/b/text()'], ['//img[contains(@src, "/comics/archive/")]/following-sibling::table']]
 	},
 	{	url:	'smbc-comics.com',
-		img:	['//center/img[contains(@src,"/comics/")]'],
-		back:	['//map[@name="buttons"]/area[2]/@href'],
-		next:	['//map[@name="buttons"]/area[4]/@href'],
+		img:	[['#comicimage img']],
+		back:	[['.backRollover[href]']],
+		next:	[['.nextRollover[href]']],
 		extra:	[['//div[@id="aftercomic"]/img[contains(@src,"/")]']],
 		style:	'div{float:none;}'
 	},
@@ -961,7 +962,7 @@ var paginas = [
 		style:	'#page{width:1210px;} .narrowcolumn{width:810px;}',
 		bgcol:	'#334255'
 	},
-	{	url:	'mangastream.com',
+	{	url:	'mangastream.com|readms.com',
 		img:	[['#manga-page']],
 		style:	'.subnav[style*="fixed"]{display: none;}',
 		scrollx:'R',
