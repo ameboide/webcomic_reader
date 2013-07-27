@@ -3719,16 +3719,12 @@ var paginas = [
 					return url;
 				}
 	},
-	{	url:	'onemanga.me',
+	{	url:	'onemanga.me|mangabee.com',
 		img:	[['.manga-page']],
 		scrollx:'R'
 	},
 	{	url:	'mngacow.com',
 		img:	[['.prw a img']],
-		scrollx:'R'
-	},
-	{	url:	'mangabee.com',
-		img:	[['.manga-page']],
 		scrollx:'R'
 	},
 	/*
