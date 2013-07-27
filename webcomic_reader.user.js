@@ -742,6 +742,7 @@ var defaultSettings = {
 // @include        http://octopuns.blogspot.com/*
 // @include        http://www.onemanga.me/*
 // @include        http://mngacow.com/*
+// @include        http://www.mangabee.com/*
 // ==/UserScript==
 
 var dataCache = null; //cache para no leer del disco y parsear la configuracion en cada getData
@@ -3725,7 +3726,11 @@ var paginas = [
 	{	url:	'mngacow.com',
 		img:	[['.prw a img']],
 		scrollx:'R'
-	}
+	},
+	{	url:	'mangabee.com',
+		img:	[['.manga-page']],
+		scrollx:'R'
+	},
 	/*
 	,
 	{	url:	'',
