@@ -743,6 +743,8 @@ var defaultSettings = {
 // @include        http://www.onemanga.me/*
 // @include        http://mngacow.com/*
 // @include        http://www.mangabee.com/*
+// @include        http://www.ver-manga.net/*
+// @include        http://mangadoom.com/*
 // ==/UserScript==
 
 var dataCache = null; //cache para no leer del disco y parsear la configuracion en cada getData
@@ -1868,7 +1870,7 @@ var paginas = [
 		next:	'img[@alt="Next Comic"]'
 	},
 	{	url:	'submanga.com',
-		img:	'http://img',
+		img:	[['div > a > img']],
 		back:	'img[@src="./s/hdl.gif"]',
 		next:	'img[@src="./s/hdr.gif"]',
 		extra:	[['//select']],
@@ -1882,12 +1884,12 @@ var paginas = [
 				}
 	},
 	{	url:	'g.e-hentai.org|exhentai.org',
-		img:	[['#i3 a img']],
+		img:	[['#i3 a img, iframe + a img, .smi > a img']],
 		back:	function(html, pos){
 					var num = Number(link[pos].match(/-(\d+)(\?.+)?$/)[1]);
 					var as = xpath('//a[img]', html, true);
 					for(var i=0; i<as.length; i++)
-						if(as[i].href.match(new RegExp('-'+(num-1)+'$')))
+						if(as[i].href.match(new RegExp('-'+(num-1)+'(\\?|$)')))
 							return as[i].href;
 					throw 'fail';
 				},
@@ -1895,7 +1897,7 @@ var paginas = [
 					var num = Number(link[pos].match(/-(\d+)(\?.+)?$/)[1]);
 					var as = xpath('//a[img]', html, true);
 					for(var i=0; i<as.length; i++)
-						if(as[i].href.match(new RegExp('-'+(num+1)+'$')))
+						if(as[i].href.match(new RegExp('-'+(num+1)+'(\\?|$)')))
 							return as[i].href;
 					throw 'fail';
 				},
@@ -3723,10 +3725,16 @@ var paginas = [
 		img:	[['.manga-page']],
 		scrollx:'R'
 	},
-	{	url:	'mngacow.com',
+	{	url:	'mngacow.com|mangadoom.com',
 		img:	[['.prw a img']],
+		style:	'#wcr_imagen{max-width:none;}',
 		scrollx:'R'
 	},
+	{	url:	'ver-manga.net',
+		img:	'http://www.ver-manga.net/cdn/',
+		back:	'.="Anterior"',
+		next:	'.="Siguiente"'
+	}
 	/*
 	,
 	{	url:	'',
@@ -4160,7 +4168,10 @@ function iniciar(){
 		setEvt('wcr_btn-1', 'click', btnback);
 		setEvt(elemImagen, 'click', imgClick);
 		setEvt(elemImagen, 'mousemove', imgCursor);
-		setEvt(elemImagen, 'load', fitImagen);
+		setEvt(elemImagen, 'load', function(){
+			fitImagen(); 
+			scrollear();
+		});
 		setEvt('wcr_btnaddbm', 'click', addBookmark);
 		setEvt('wcr_btnfit', 'click', toggleConfFit);
 		setEvt('wcr_btnlayout', 'click', toggleConfKeepLayout);
@@ -4447,8 +4458,6 @@ function fitImagen(reintentando){
 		if(!reintentando && size.p!=winsize().p) fitImagen(true); 
 	}
 	else get('wcr_imagen').setAttribute('style', '');
-
-	scrollear();
 }
 
 //obtiene el porte original de la imagen
@@ -5310,6 +5319,7 @@ function toggleConfShowButtons(){
 function toggleConfFit(){
 	fitSize = toggleConfBool('fit', fitSize);
 	fitImagen();
+	scrollear();
 	get('wcr_btnfit').innerHTML = (fitSize ? 'Disable' : 'Enable') + ' Fit-to-screen';
 }
 
