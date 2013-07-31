@@ -923,7 +923,16 @@ var paginas = [
 		back:	[['.backRollover[href]']],
 		next:	[['.nextRollover[href]']],
 		extra:	[['//div[@id="aftercomic"]/img[contains(@src,"/")]']],
-		style:	'div{float:none;}'
+		style:	'div{float:none;}',
+		js:		function(dir){
+					if(!dir){
+						exec('document.removeEventListener("keyup", onKeyUp, false)');
+						setEvt(document, 'keyup', function(evt){
+							exec('checkCodes('+evt.keyCode+')');
+							if([88, 191, 82].indexOf(evt.keyCode) >= 0) exec('jumpToRandom()');
+						});
+					}
+				}
 	},
 	{	url:	'abstrusegoose.com',
 		img:	'http://abstrusegoose.com/strips/',
@@ -3706,6 +3715,8 @@ var paginas = [
 	},
 	{	url:	'mrlovenstein.com',
 		img:	[['.comic_image div img']],
+		back:	'img[contains(@src, "nav_left")]',
+		next:	'img[contains(@src, "nav_right")]',
 		layelem:'//div[@class="comic_image"]'
 	},
 	{	url:	'anticscomic.com',
@@ -4093,16 +4104,10 @@ function iniciar(){
 		if(typeof(scrollx)=='number' && scrollx){
 			bordex = scrollx<0 ? -scrollx : scrollx;
 			scrollx = scrollx<0 ? 'R' : 'L';
-			var c = confVal('scrollx', '', ''); //si es de esta pag me va a tirar scrollx, si no ''
-			setData('bordex', bordex, c ? undefined : 'default');
-			setData('scrollx', scrollx, c ? undefined : 'default');
 		}
 		if(typeof(scrolly)=='number' && scrolly){
 			bordey = scrolly<0 ? -scrolly : scrolly;
 			scrolly = scrolly<0 ? 'D' : 'U';
-			c = confVal('scrolly', '', ''); //si es de esta pag me va a tirar scrolly, si no ''
-			setData('bordey', bordey, c ? undefined : 'default');
-			setData('scrolly', scrolly, c ? undefined : 'default');
 		}
 
 		if(scrollx == 'R' && confBool('flipControlsManga', false)){
