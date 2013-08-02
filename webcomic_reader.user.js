@@ -431,8 +431,7 @@ var defaultSettings = {
 // @include        http://www.itswalky.com/*
 // @include        http://itswalky.com/*
 // @include        http://www.evildivacomics.com/*
-// @include        http://axecop.com/index.php/acepisodes/*
-// @include        http://axecop.com/index.php/acask/*
+// @include        http://axecop.com/*
 // @include        http://www.somethingofthatilk.com/*
 // @include        http://somethingofthatilk.com/*
 // @include        http://imgur.com/*
@@ -976,7 +975,9 @@ var paginas = [
 	},
 	{	url:	'mangastream.com|readms.com',
 		img:	[['#manga-page']],
-		style:	'.subnav[style*="fixed"]{display: none;}',
+		back:	[['.previous a']],
+		next:	[['.next a']],
+		style:	'.subnav[style*="fixed"]{display: none;}#wcr_imagen{max-width:none;}#reader-sky{z-index:-1;}',
 		scrollx:'R',
 		layout:	true
 	},
@@ -2192,9 +2193,11 @@ var paginas = [
 		img:	'http://www.shortpacked.com/comics/'
 	},
 	{	url:	'axecop.com',
-		img:	[['p>img']],
-		back:	'img[@src="http://axecop.com/acimages/buttons/page_left.png"]',
-		next:	'img[@src="http://axecop.com/acimages/buttons/page_right.png"]'
+		img:	[['#comic img']],
+		back:	'.="Prev"',
+		next:	'.="Next"',
+		extra:	[[['.entry-content']]],
+		txtcol:	'#fff'
 	},
 	{	url:	'somethingofthatilk.com',
 		img:	'/comics/',
