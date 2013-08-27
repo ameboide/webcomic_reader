@@ -1598,7 +1598,7 @@ var paginas = [
 					if(x<0 || x>thumbs.length) throw 'fail';
 					x = x.toString();
 					while(x.length<3) x='0'+x;
-					return html.match(/'([^']+\/c\/manga\/[^']+)'/)[1] + x + '.jpg'; 
+					return html.match(/'([^']+\/images\/manga\/[^']+)'/)[1] + x + '.jpg'; 
 				},
 		back:	function(html, pos){
 					var thumbs = JSON.parse(match(html, /params\.thumbs\s*=\s*(.+);/, 1));
