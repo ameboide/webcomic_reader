@@ -69,6 +69,7 @@ var defaultSettings = {
 // @include        http://www.giantitp.com/*
 // @include        http://www.dilbert.com/*
 // @include        http://dilbert.com/*
+// @include        http://hf.dilbert.com/*
 // @include        http://www.explosm.net/*
 // @include        http://explosm.net/*
 // @include        http://www.nuklearpower.com/*
@@ -883,7 +884,7 @@ var paginas = [
 				}],
 		bgcol:	'#fff'
 	},
-	{	url:	'dilbert.com',
+	{	url:	'*.dilbert.com',
 		img:	[['.STR_Image img, .LGT_Date ~ img']],
 		back:	[['.STR_Prev, .LGT_Date a:nth-of-type(1)']],
 		next:	[['.STR_Next, .LGT_Date a:nth-of-type(2)']],
@@ -1633,6 +1634,7 @@ var paginas = [
 					x = Number(x ? x[1] : 0)+posActual;
 					get('thumbs').style.display = x ? 'none' : '';
 				},
+		style:	'header{position:absolute;}',
 		scrollx:'R',
 		layelem:'//div[@id="image"]'
 	},
