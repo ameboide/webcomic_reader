@@ -745,6 +745,15 @@ var defaultSettings = {
 // @include        http://www.mangabee.com/*
 // @include        http://www.ver-manga.net/*
 // @include        http://mangadoom.com/*
+// @include        http://www.powernapcomic.com/*
+// @include        http://www.ismanga.com/*
+// @include        http://www.mangabird.com/*
+// @include        http://mangachrome.com/*
+// @include        http://www.7manga.com/*
+// @include        http://7manga.com/*
+// @include        http://www.mangadevil.com/*
+// @include        http://mangadevil.com/*
+// @include        http://www.mangamofo.com/*
 // ==/UserScript==
 
 var dataCache = null; //cache para no leer del disco y parsear la configuracion en cada getData
@@ -3749,7 +3758,69 @@ var paginas = [
 	{	url:	'ver-manga.net',
 		img:	'http://www.ver-manga.net/cdn/',
 		back:	'.="Anterior"',
-		next:	'.="Siguiente"'
+		next:	'.="Siguiente"',
+		scrollx:'R'
+	},
+	{	url:	'powernapcomic.com',
+		img:	[['center > img']],
+		extra:	[[['.titulo2']], [['.titulo2 + .news']]]
+	},
+	{	url:	'ismanga.com',
+		style:	'#wcr_imagen{max-width:none;}',
+		scrollx:'R'
+	},
+	{	url:	'mangabird.com',
+		img:	'http://image.mangabird.info/sites/default/files/',
+		back:	function(html, pos){
+					return link[pos].replace(/(page=)(\d+)/, function(s, p, n){
+						return n=='0' ? s : p + (parseInt(n) - 1);
+					});
+				},
+		next:	[['.content a']],
+		style:	'#wcr_imagen{max-width:none;}',
+		scrollx:'R'
+	},
+	{	url:	'mangachrome.com',
+		img:	[/src="([^\"]+)".+name="img"/, 1],
+		scrollx:'R'
+	},
+	{	url:	'7manga.com',
+		img:	function(html, pos){
+					if(!pos) return get('TheImg');
+					var m = link[pos].match(/[&?]n=(\d+)/);
+					var n = m ? parseInt(m[1]) : 1;
+					return imagen[0].replace(/\/0\/.+$/, '/0/' + selCss('#pic', html).value.split('\n')[n-1] + '.jpg');
+				},
+		back:	function(html, pos){
+					var m = link[pos].match(/[&?]n=(\d+)/);
+					var n = m ? parseInt(m[1]) : 1;
+					if(n > 1) return link[pos].replace(/([&?]n=)\d+/, '$1'+(n-1));
+					return link[pos].replace(/(\d+)\.html/, function(s, n){
+						return n=='1' ? s : (parseInt(n) - 1) + '.html';
+					});
+				},
+		next:	function(html, pos){
+					var pc = html.match(/var pc=.*?(\d+)/)[1];
+					var m = link[pos].match(/[&?]n=(\d+)/);
+					var n = m ? parseInt(m[1]) : 0;
+					if(n != pc){
+						if(n) return link[pos].replace(/([&?]n=)\d+/, '$1'+(n+1));
+						return link[pos] + '?n=2';
+					}
+					return link[pos].replace(/(\d+)\.html.+/, function(s, n){
+						return n=='1' ? s : (parseInt(n) + 1) + '.html';
+					});
+				},
+		scrollx:'R'
+	},
+	{	url:	'mangadevil.com',
+		img:	[['#manga_image img']],
+		scrollx:'R'
+	},
+	{	url:	'mangamofo.com',
+		img:	[['.prw img']],
+		style:	'#wcr_imagen{max-width:none;}.prw{overflow:visible !important;}',
+		scrollx:'R'
 	}
 	/*
 	,
