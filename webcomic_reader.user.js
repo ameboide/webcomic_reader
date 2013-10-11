@@ -42,11 +42,11 @@ var defaultSettings = {
 // ==UserScript==
 // @name           Webcomic Reader
 // @author         ameboide
-// @version        2013.09.07
+// @version        2013.10.10
 // @namespace      http://userscripts.org/scripts/show/59842
 // @description    Can work on almost any webcomic/manga page, preloads 5 or more pages ahead (or behind), navigates via ajax for instant-page-change, lets you use the keyboard, remembers your progress, and it's relatively easy to add new sites
-// @lastchanges    fixed dilbert and fakku
-// @updatetype     16
+// @lastchanges    added 7 sites
+// @updatetype     8
 // @grant          GM_getValue
 // @grant          GM_setValue
 // @grant          GM_deleteValue
