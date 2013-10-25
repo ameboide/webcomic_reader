@@ -756,6 +756,12 @@ var defaultSettings = {
 // @include        http://www.mangamofo.com/*
 // @include        http://*.hentai.ms/*
 // @include        http://view.mangamonger.com/*
+// @include        http://blackbird.ashen-ray.com/*
+// @include        http://carciphona.com/*
+// @include        http://ahs-comic.com/*
+// @include        http://www.gogetaroomie.com/*
+// @include        http://gogetaroomie.com/*
+// @include        http://giantqueensakura.thecomicseries.com/*
 // ==/UserScript==
 
 var dataCache = null; //cache para no leer del disco y parsear la configuracion en cada getData
@@ -3852,6 +3858,21 @@ var paginas = [
 				},
 		style:	'#wcr_imagen{max-width:none;}',
 		scrollx:'R'
+	},
+	{	url:	'blackbird.ashen-ray.com|carciphona.com',
+		img:	function(html, pos){
+					return selCss('.page', html).style.backgroundImage.match(/"(.+)"/)[1];
+				},
+		layelem:'//div[@class="page"]',
+		scrollx:'R'
+	},
+	{	url:	'ahs-comic.com',
+		img:	[['.webcomic-image img']],
+		extra:	[[['#main article']]],
+		style:	'.webcomic-image{font-size: 1em; line-height: 1;}'
+	},
+	{	url:	'gogetaroomie.com',
+		extra:	[[['#newsarea > *', '', 0, -3]]]
 	}
 	/*
 	,
