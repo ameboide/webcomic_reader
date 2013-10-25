@@ -754,6 +754,8 @@ var defaultSettings = {
 // @include        http://www.mangadevil.com/*
 // @include        http://mangadevil.com/*
 // @include        http://www.mangamofo.com/*
+// @include        http://*.hentai.ms/*
+// @include        http://view.mangamonger.com/*
 // ==/UserScript==
 
 var dataCache = null; //cache para no leer del disco y parsear la configuracion en cada getData
@@ -3820,6 +3822,35 @@ var paginas = [
 	{	url:	'mangamofo.com',
 		img:	[['.prw img']],
 		style:	'#wcr_imagen{max-width:none;}.prw{overflow:visible !important;}',
+		scrollx:'R'
+	},
+	{	url:	'*.hentai.ms',
+		img:	[['.index_box > table center img, .pagination img']],
+		scrollx:'R'
+	},
+	{	url:	'view.mangamonger.com',
+		img:	[['#mainimage']],
+		back:	function(html, pos){
+					try{
+						var page = xpath('//select[@name="page"]/option[@selected]/preceding-sibling::option[1]/@value', html);
+						var ch = xpath('//select[@name="ch"]/option[@selected]/@value', html);
+					}catch(e){
+						var page = xpath('//input[@name="lastpage"]/@value', html);
+						var ch = xpath('//select[@name="ch"]/option[@selected]/preceding-sibling::option[1]/@value', html);
+					}
+					return '?ch='+ch+'&page='+page;
+				},
+		next:	function(html, pos){
+					try{
+						var page = xpath('//select[@name="page"]/option[@selected]/following-sibling::option[1]/@value', html);
+						var ch = xpath('//select[@name="ch"]/option[@selected]/@value', html);
+					}catch(e){
+						var page = '1';
+						var ch = xpath('//select[@name="ch"]/option[@selected]/following-sibling::option[1]/@value', html);
+					}
+					return '?ch='+ch+'&page='+page;
+				},
+		style:	'#wcr_imagen{max-width:none;}',
 		scrollx:'R'
 	}
 	/*
