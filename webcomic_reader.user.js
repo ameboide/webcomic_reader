@@ -762,6 +762,11 @@ var defaultSettings = {
 // @include        http://www.gogetaroomie.com/*
 // @include        http://gogetaroomie.com/*
 // @include        http://giantqueensakura.thecomicseries.com/*
+// @include        http://www.sleepymaid.com/gallery/displayimage.php*
+// @include        http://sleepymaid.com/gallery/displayimage.php*
+// @include        http://www.squid-ops.com/*
+// @include        http://squid-ops.com/*
+// @include        http://www.endcomic.com/*
 // ==/UserScript==
 
 var dataCache = null; //cache para no leer del disco y parsear la configuracion en cada getData
@@ -3873,6 +3878,16 @@ var paginas = [
 	},
 	{	url:	'gogetaroomie.com',
 		extra:	[[['#newsarea > *', '', 0, -3]]]
+	},
+	{	url:	'sleepymaid.com',
+		img:	[['.image']]
+	},
+	{	url:	'squid-ops.com',
+		img:	[['#content img']]
+	},
+	{	url:	'endcomic.com',
+		img:	[['#comic img']],
+		extra:	[[['.entry']]]
 	}
 	/*
 	,
