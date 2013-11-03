@@ -3765,7 +3765,9 @@ var paginas = [
 	},
 	{	url:	'mngacow.com|mangadoom.com',
 		img:	[['.prw a img']],
-		style:	'#wcr_imagen{max-width:none;}',
+		back:	'.="Prev"',
+		next:	'.="Next"',
+		style:	'#wcr_imagen{max-width:none;}#sct_col_l.full_width{width:auto;}',
 		scrollx:'R'
 	},
 	{	url:	'ver-manga.net',
