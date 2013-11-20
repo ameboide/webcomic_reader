@@ -42,10 +42,10 @@ var defaultSettings = {
 // ==UserScript==
 // @name           Webcomic Reader
 // @author         ameboide
-// @version        2013.11.03
+// @version        2013.11.19
 // @namespace      http://userscripts.org/scripts/show/59842
 // @description    Can work on almost any webcomic/manga page, preloads 5 or more pages ahead (or behind), navigates via ajax for instant-page-change, lets you use the keyboard, remembers your progress, and it's relatively easy to add new sites
-// @lastchanges    added 9 sites, fixed 1 more
+// @lastchanges    added 3 sites, fixed 2 more
 // @updatetype     24
 // @grant          GM_getValue
 // @grant          GM_setValue
@@ -767,6 +767,11 @@ var defaultSettings = {
 // @include        http://www.squid-ops.com/*
 // @include        http://squid-ops.com/*
 // @include        http://www.endcomic.com/*
+// @include        http://www.thenoobcomic.com/*
+// @include        http://thenoobcomic.com/*
+// @include        http://zizki.com/*
+// @include        http://*.zizki.com/*
+// @include        http://pururin.com/*
 // ==/UserScript==
 
 var dataCache = null; //cache para no leer del disco y parsear la configuracion en cada getData
@@ -1111,6 +1116,7 @@ var paginas = [
 		scrollx:'R'
 	},
 	{	url:	'amultiverse.com',
+		img:	[['#comic img']],
 		extra:	[['//div[@class="post-content"]']],
 		js:		function(){ if(keepLayout) get('comic').style.height = get('wcr_div').offsetHeight + 'px'; },
 		xelem:	'//div[@id="content"]//div[@class="post-content"]',
@@ -2558,6 +2564,10 @@ var paginas = [
 				},
 		extra:	[['//img[@id="comic_page" and not(./ancestor::div[contains(@style, "display: none;")])]', '<br/>', 1],
 					[['.moderation_bar']]],
+		fixurl:	function(url, img, link){
+					if(img) return encodeURI(url);
+					return url;
+				},
 		layelem:'//img[@id="comic_page"]',
 		scrollx:'R'
 	},
@@ -3890,6 +3900,19 @@ var paginas = [
 	{	url:	'endcomic.com',
 		img:	[['#comic img']],
 		extra:	[[['.entry']]]
+	},
+	{	url:	'thenoobcomic.com',
+		back:	[['.comic_nav_previous_button']],
+		next:	[['.comic_nav_next_button']]
+	},
+	{	url:	'*.zizki.com',
+		img:	[['.back img']],
+		back:	[['.larr']],
+		next:	[['.rarr']]
+	},
+	{	url:	'pururin.com',
+		img:	[['.b']],
+		scrollx:'R'
 	}
 	/*
 	,
