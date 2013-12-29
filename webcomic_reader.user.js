@@ -54,6 +54,8 @@ var defaultSettings = {
 // @grant          GM_registerMenuCommand
 // @grant          GM_openInTab
 // @updateURL      https://userscripts.org/scripts/source/59842.meta.js
+// @installURL     https://userscripts.org/scripts/source/59842.user.js
+// @downloadURL    https://userscripts.org/scripts/source/59842.user.js
 // @include        http://www.sluggy.com/*
 // @include        http://sluggy.com/*
 // @include        http://www.penny-arcade.com/comic*
@@ -772,6 +774,8 @@ var defaultSettings = {
 // @include        http://zizki.com/*
 // @include        http://*.zizki.com/*
 // @include        http://pururin.com/*
+// @include        http://www.thedailyblink.com/*
+// @include        http://mangabandits.net/*
 // ==/UserScript==
 
 var dataCache = null; //cache para no leer del disco y parsear la configuracion en cada getData
@@ -2569,6 +2573,7 @@ var paginas = [
 					return url;
 				},
 		layelem:'//img[@id="comic_page"]',
+		style:	'#read_settings + div > div:last-of-type{height: 0 !important;}',
 		scrollx:'R'
 	},
 	{	url:	'nedroid.com',
@@ -3261,8 +3266,10 @@ var paginas = [
 		scrollx:'R'
 	},
 	{	url:	'shiftylook.com',
-		img:	[['.the-comic img']],
-		style:	'.the-comic{height:auto !important;}'
+		img:	[['.comicMainImage img']],
+		back:	'@class="prev"',
+		next:	'@class="next"',
+		style:	'.comicMainImage{height:auto !important;}'
 	},
 	{	url:	'onlinereader.mangapirate.net',
 		img:	[['#page']],
