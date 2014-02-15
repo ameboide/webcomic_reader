@@ -776,6 +776,7 @@ var defaultSettings = {
 // @include        http://pururin.com/*
 // @include        http://www.thedailyblink.com/*
 // @include        http://mangabandits.net/*
+// @include        http://www.neumanga.com/*
 // ==/UserScript==
 
 var dataCache = null; //cache para no leer del disco y parsear la configuracion en cada getData
@@ -889,14 +890,9 @@ var usarb64 = confBool('b64_images', false);
 var paginas = [
 
 	{	url:	'penny-arcade.com',
-		img:	[['.post.comic img']],
-		extra:	[[['#pageTitle h2']]],
-		fixurl:	function(url, img, link){
-					if(link && document.location.href.indexOf('//www.')>0){
-						return url.replace('//penny', '//www.penny');
-					}
-					return url;
-				}
+		img:	[['#comicFrame img']],
+		extra:	[[['.title h2']]],
+		style:	'#bb,#header{position:relative;}'
 	},
 	{	url:	'xkcd.',
 		img:	['//div[@id="comic"]//img'],
@@ -935,8 +931,9 @@ var paginas = [
 		txtcol:	'#000'
 	},
 	{	url:	'pvponline.com',
-		img:	[['.post img']],
-		extra:	[[['#headingArchive']]]
+		img:	[['.comic-art img']],
+		extra:	[[['.comic header']]],
+		style:	'.nav-locked .main-nav{display: none;}'
 	},
 	{	url:	'brawlinthefamily.keenspot.com',
 		extra:	[['//div[@class="post-comic"]']],
@@ -3700,7 +3697,7 @@ var paginas = [
 				},
 		scrollx:'R'
 	},
-	{	url:	'mangaesta.net|www.mabuns.web.id|manga4indo.com',
+	{	url:	'mangaesta.net|www.mabuns.web.id|manga4indo.com|neumanga.com',
 		img:	function(html, pos){
 					var page = match(link[pos], /page=(\d+)$/, 1, 1);
 					var pages = html.match(/addpage\('(.+)?'.*\)/g);
