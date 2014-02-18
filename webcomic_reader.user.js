@@ -42,7 +42,7 @@ var defaultSettings = {
 // ==UserScript==
 // @name           Webcomic Reader
 // @author         ameboide
-// @version        2013.11.19
+// @version        2014.02.18
 // @namespace      http://userscripts.org/scripts/show/59842
 // @description    Can work on almost any webcomic/manga page, preloads 5 or more pages ahead (or behind), navigates via ajax for instant-page-change, lets you use the keyboard, remembers your progress, and it's relatively easy to add new sites
 // @lastchanges    added 3 sites, fixed 2 more
@@ -777,6 +777,8 @@ var defaultSettings = {
 // @include        http://www.thedailyblink.com/*
 // @include        http://mangabandits.net/*
 // @include        http://www.neumanga.com/*
+// @include        http://www.pecintakomik.com/*
+// @include        http://mindcrack.thecomicseries.com/*
 // ==/UserScript==
 
 var dataCache = null; //cache para no leer del disco y parsear la configuracion en cada getData
@@ -3678,7 +3680,7 @@ var paginas = [
 	},
 	{	url:	'*.senmanga.com',
 		img:	function(html, pos){
-					try{ match(html, /img\.src *= *'([^\']+)'/, 1); }
+					try{ return match(html, /img\.src *= *'([^\']+)'/, 1); }
 					catch(e){ return selCss('#picture', html); }
 				},
 		back:	function(html, pos){
@@ -3916,6 +3918,24 @@ var paginas = [
 	},
 	{	url:	'pururin.com',
 		img:	[['.b']],
+		scrollx:'R'
+	},
+	{	url:	'pecintakomik.com',
+		img:	[['.picture']],
+		back:	function(html, pos){
+					try{ return xpath('//a[./img[contains(@src, "/previous.png")]]', html); }
+					catch(e){
+						var chapter = xpath('//select[@name="chapter"]/option[@selected]/following-sibling::option[1]', html).value;
+						return link[pos].replace(/(\/manga\/[^\/]+\/)(.+)/, '$1' + chapter);
+					}
+				},
+		next:	function(html, pos){
+					try{ return xpath('//a[./img[contains(@src, "/next.png")]]', html); }
+					catch(e){
+						var chapter = xpath('//select[@name="chapter"]/option[@selected]/preceding-sibling::option[1]', html).value;
+						return link[pos].replace(/(\/manga\/[^\/]+\/)(.+)/, '$1' + chapter);
+					}
+				},
 		scrollx:'R'
 	}
 	/*
