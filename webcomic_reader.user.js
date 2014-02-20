@@ -42,10 +42,10 @@ var defaultSettings = {
 // ==UserScript==
 // @name           Webcomic Reader
 // @author         ameboide
-// @version        2014.02.18
+// @version        2014.02.20
 // @namespace      http://userscripts.org/scripts/show/59842
 // @description    Can work on almost any webcomic/manga page, preloads 5 or more pages ahead (or behind), navigates via ajax for instant-page-change, lets you use the keyboard, remembers your progress, and it's relatively easy to add new sites
-// @lastchanges    added 3 sites, fixed 2 more
+// @lastchanges    added 7 sites, fixed 8 more
 // @updatetype     24
 // @grant          GM_getValue
 // @grant          GM_setValue
@@ -779,6 +779,9 @@ var defaultSettings = {
 // @include        http://www.neumanga.com/*
 // @include        http://www.pecintakomik.com/*
 // @include        http://mindcrack.thecomicseries.com/*
+// @include        http://www.schizmatic.com/*
+// @include        http://schizmatic.com/*
+// @include        http://www.yuri-ism.net/*
 // ==/UserScript==
 
 var dataCache = null; //cache para no leer del disco y parsear la configuracion en cada getData
@@ -1944,11 +1947,14 @@ var paginas = [
 							return as[i].href;
 					throw 'fail';
 				},
-		extra:	[['//div[span]']],
+		extra:	[['//div[span]'], '<span style="display:none">', ['//a[@onclick[contains(., "nl")]]'], '</span>'],
 		scrollx:'R',
-		onerr:	function(url, img, num){
-					if(num >= 2) return null;
-					return {url: url + '?nl=' + (num+1) };
+		onerr:	function(url, img, num, pos){
+					if(num >= 4) return null;
+					var nl = extra[pos].innerHTML.match(/nl\((\d+)\)/)[1];
+					var u = url.split('?nl=');
+					if(u[1] == nl) return null;
+					return {url: u[1] + '?nl=' + nl };
 				}
 	},
 	{	url:	'animesquish.com',
@@ -1990,9 +1996,11 @@ var paginas = [
 		scrollx:'R'
 	},
 	{	url:	'bittersweetcandybowl.com',
-		back:	'@class="previouspage"',
-		next:	'@class="nextpage"',
-		extra:	[[['#content>p:not([id])', '']], [['#comicselect']]]
+		img:	[['#page_img']],
+		back:	'@rel="prev"',
+		next:	'@rel="next"',
+		extra:	[[['#authorcommentary']], [['#comicselect']]],
+		style:	'.pagenavlink{display:none;} #content #wcr_div *{text-align:center;}'
 	},
 	{	url:	'imagebam.com',
 		img:	['//img[@alt="loading"]']
@@ -2762,6 +2770,9 @@ var paginas = [
 		img:	'/comics/',
 		extra:	[[['img[src^="/comics/"]', '', 1]]]
 	},
+	{	url:	'kastlecomics.comicgenesis.com',
+		img:	[['img[src*="/comics/"]']]
+	},
 	{	url:	'evernightcomic.com',
 		style:	'#wcr_imagen{height:auto !important;}'
 	},
@@ -2807,14 +2818,14 @@ var paginas = [
 		layelem:'//div[@id="thePic"]',
 		scrollx:'R'
 	},
-	{	url:	'foolrulez.org|manga.redhawkscans.com|mangatopia.net|simple-scans.com|mudascantrad.com|fallensyndicate.com|slide.extrascans.net|reader.fth-scans.com|reader.japanzai.com|manga-tu.be|friendshipscans.com',
+	{	url:	'foolrulez.org|manga.redhawkscans.com|mangatopia.net|simple-scans.com|mudascantrad.com|fallensyndicate.com|slide.extrascans.net|reader.fth-scans.com|reader.japanzai.com|manga-tu.be|friendshipscans.com|yuri-ism.net',
 		img:	[['#page img']],
 		back:	function(html, pos){
 				try{
 					var relpath = xpath('//div[@class="topbar_right"]/span[@class="numbers"]/div[contains(concat(" ",@class," ")," current_page ")]/following-sibling::div[1]//@href', html);
 					if (relpath.match(/^http/i)) return relpath;
 					var basepath = "";
-					try{ basepath = html.match(/var\s+baseurl\s*=\s*(['"])(.*?)\1\s*;/i)[2]; }
+					try{ basepath = html.match(/var\s+base_?url\s*=\s*(['"])(.*?)\1\s*;/i)[2]; }
 					catch(e){}
 					return basepath + relpath;
 				}
@@ -2834,7 +2845,7 @@ var paginas = [
 					var relpath = xpath('//div[@class="topbar_right"]/span[@class="numbers"]/div[contains(concat(" ",@class," ")," current_page ")]/preceding-sibling::div[1]//@href', html);
 					if (relpath.match(/^http/i)) return relpath;
 					var basepath = "";
-					try{ basepath = html.match(/var\s+baseurl\s*=\s*(['"])(.*?)\1\s*;/i)[2]; }
+					try{ basepath = html.match(/var\s+base_?url\s*=\s*(['"])(.*?)\1\s*;/i)[2]; }
 					catch(e){}
 					return basepath + relpath;
 				}
@@ -2850,7 +2861,7 @@ var paginas = [
 					if (!topbar) return;
 					
 					var basepath = "";
-					try{ basepath = html.match(/var\s+baseurl\s*=\s*([\'\"])(.*?)\1\s*;/i)[2]; }
+					try{ basepath = html.match(/var\s+base_?url\s*=\s*([\'\"])(.*?)\1\s*;/i)[2]; }
 					catch(e){}
 					var relpaths = xpath('//a[starts-with(@href,"page/")]', topbar, true);
 					for (var x = 0; x < relpaths.length; ++x) {
@@ -3937,6 +3948,10 @@ var paginas = [
 					}
 				},
 		scrollx:'R'
+	},
+	{	url:	'schizmatic.com',
+		img:	[/src=&quot;(.+?)&quot;/, 1],
+		extra:	[[['#authorText']]]
 	}
 	/*
 	,
