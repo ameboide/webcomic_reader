@@ -1427,9 +1427,9 @@ var paginas = [
 		back:	'..[@id="prev"]'
 	},
 	{	url:	'ruthe.de',
-		img:	['//img[@alt="Cartoon"]'],
-		back:	'img[@id="back"]',
-		next:	'img[@id="weiter"]'
+		img:	['//div[@id="cartoon"]//img'],
+		back:	'//a[@id="b_back"]/@href',
+		next:	'//a[@id="b_next"]/@href'
 	},
 	{	url:	'daybydaycartoon.com',
 		img:	['//div/p/img']
