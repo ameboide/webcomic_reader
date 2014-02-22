@@ -763,7 +763,7 @@ var defaultSettings = {
 // @include        http://ahs-comic.com/*
 // @include        http://www.gogetaroomie.com/*
 // @include        http://gogetaroomie.com/*
-// @include        http://giantqueensakura.thecomicseries.com/*
+// @include        http://*.thecomicseries.com/*
 // @include        http://www.sleepymaid.com/gallery/displayimage.php*
 // @include        http://sleepymaid.com/gallery/displayimage.php*
 // @include        http://www.squid-ops.com/*
@@ -778,7 +778,6 @@ var defaultSettings = {
 // @include        http://mangabandits.net/*
 // @include        http://www.neumanga.com/*
 // @include        http://www.pecintakomik.com/*
-// @include        http://mindcrack.thecomicseries.com/*
 // @include        http://www.schizmatic.com/*
 // @include        http://schizmatic.com/*
 // @include        http://www.yuri-ism.net/*
@@ -1428,8 +1427,8 @@ var paginas = [
 	},
 	{	url:	'ruthe.de',
 		img:	['//div[@id="cartoon"]//img'],
-		back:	'//a[@id="b_back"]/@href',
-		next:	'//a[@id="b_next"]/@href'
+		back:	'@id="b_back"',
+		next:	'@id="b_next"'
 	},
 	{	url:	'daybydaycartoon.com',
 		img:	['//div/p/img']
@@ -2580,7 +2579,6 @@ var paginas = [
 					return url;
 				},
 		layelem:'//img[@id="comic_page"]',
-		style:	'#read_settings + div > div:last-of-type{height: 0 !important;}',
 		scrollx:'R'
 	},
 	{	url:	'nedroid.com',
