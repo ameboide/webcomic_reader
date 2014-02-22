@@ -261,7 +261,7 @@ var defaultSettings = {
 // @include        http://www.soulless-comic.com/*
 // @include        http://www.earthsongsaga.com/vol*
 // @include        http://rainchildstudios.com/strawberry/*
-// @include        http://www.goblinscomic.com/*
+// @include        http://www.goblinscomic.org/*
 // @include        http://www.venusenvycomic.com/*
 // @include        http://venusenvycomic.com/*
 // @include        http://www.meekcomic.com/*
