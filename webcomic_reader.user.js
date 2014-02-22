@@ -42,10 +42,10 @@ var defaultSettings = {
 // ==UserScript==
 // @name           Webcomic Reader
 // @author         ameboide
-// @version        2014.02.20
+// @version        2014.02.22
 // @namespace      http://userscripts.org/scripts/show/59842
 // @description    Can work on almost any webcomic/manga page, preloads 5 or more pages ahead (or behind), navigates via ajax for instant-page-change, lets you use the keyboard, remembers your progress, and it's relatively easy to add new sites
-// @lastchanges    added 7 sites, fixed 8 more
+// @lastchanges    added 9 sites, fixed 4 more
 // @updatetype     24
 // @grant          GM_getValue
 // @grant          GM_setValue
@@ -781,6 +781,16 @@ var defaultSettings = {
 // @include        http://www.schizmatic.com/*
 // @include        http://schizmatic.com/*
 // @include        http://www.yuri-ism.net/*
+// @include        http://www.bringbackroomies.com/*
+// @include        http://blindsprings.com/*
+// @include        http://www.wtfcomics.com/*archive.html?*
+// @include        http://wtfcomics.com/*archive.html?*
+// @include        http://www.olympusoverdrive.com/index.php?*
+// @include        http://olympusoverdrive.com/index.php?*
+// @include        http://*gucomics.com/*
+// @include        http://www.punksandnerds.com/*
+// @include        http://*.troutcave.net/*
+// @include        http://www.berserkersdaughter.com/*
 // ==/UserScript==
 
 var dataCache = null; //cache para no leer del disco y parsear la configuracion en cada getData
@@ -2621,8 +2631,9 @@ var paginas = [
 		scrollx:'R'
 	},
 	{	url:	'scarygoround.com',
-		back:	'img[@alt="Previous"]',
-		next:	'img[@alt="Next"]'
+		img:	'strips',
+		back:	'.="Previous"',
+		next:	'.="Next"'
 	},
 	{	url:	'mangastream.to',
 		back:	function(html, pos){
@@ -3950,6 +3961,38 @@ var paginas = [
 	{	url:	'schizmatic.com',
 		img:	[/src=&quot;(.+?)&quot;/, 1],
 		extra:	[[['#authorText']]]
+	},
+	{	url:	'bringbackroomies.com',
+		img:	[['#comic img']]
+	},
+	{	url:	'blindsprings.com',
+		img:	[['#comic img']]
+	},
+	{	url:	'wtfcomics.com',
+		img:	function(html, pos){
+					var m = link[pos].match(/\?(\d+)_(\d+)?/);
+					var id = Math.max(Math.min(Number(m[2] || '1'), Number(m[1])), 1);
+					return html.match(/document.writeln\(\"<IMG SRC=\\"([^"]+)/)[1] + id + '.jpg';
+				},
+		back:	function(html, pos){
+					var m = link[pos].match(/([^\/]+\?)(\d+)_(\d+)?/);
+					var id = Math.max(Math.min(Number(m[3] || '1'), Number(m[2])), 1);
+					if(id == 1) throw 'first';
+					return m[1] + m[2] + '_' + (id-1);
+				},
+		next:	function(html, pos){
+					var m = link[pos].match(/([^\/]+\?)(\d+)_(\d+)?/);
+					var id = Math.max(Math.min(Number(m[3] || '1'), Number(m[2])), 1);
+					if(id == m[2]) throw 'last';
+					return m[1] + m[2] + '_' + (id+1);
+				},
+		layelem:'//img'
+	},
+	{	url:	'olympusoverdrive.com',
+		style:	'#comic{height:auto !important;}'
+	},
+	{	url:	'*.troutcave.net',
+		style:	'#left-wrap, #comic{width:auto !important;}'
 	}
 	/*
 	,
