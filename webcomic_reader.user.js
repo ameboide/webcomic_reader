@@ -744,6 +744,7 @@ var defaultSettings = {
 // @include        http://www.mangabee.com/*
 // @include        http://www.ver-manga.net/*
 // @include        http://mangadoom.com/*
+// @include        http://gingerhaze.com/nimona/comic/*
 // ==/UserScript==
 
 var dataCache = null; //cache para no leer del disco y parsear la configuracion en cada getData
@@ -3748,7 +3749,10 @@ var paginas = [
 		img:	'http://www.ver-manga.net/cdn/',
 		back:	'.="Anterior"',
 		next:	'.="Siguiente"'
-	}
+	},
+    {   url:    'gingerhaze.com',
+        img:    'http://gingerhaze.com/sites/default/files/nimona-pages'
+    }
 	/*
 	,
 	{	url:	'',
