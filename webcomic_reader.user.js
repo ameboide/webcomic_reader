@@ -3997,7 +3997,7 @@ var paginas = [
 	},
 	{   url:    'gingerhaze.com',
         img:    'http://gingerhaze.com/sites/default/files/nimona-pages'
-	}
+    }
 
 	/*
 	,
