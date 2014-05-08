@@ -1,11 +1,11 @@
 (function(){
 var defaultSettings = {
-	prefetchNext: 5, //number of prefetched pages ahead
-	prefetchBack: 5, //number of prefetched pages behind
-	prefetchNextStart: 2, //number of prefetched pages ahead when the script starts
+	prefetchNext: 10, //number of prefetched pages ahead
+	prefetchBack: 3, //number of prefetched pages behind
+	prefetchNextStart: 3, //number of prefetched pages ahead when the script starts
 	prefetchBackStart: 1, //number of prefetched pages behind when the script starts
 	prefetchNoNext: true, //specifies if previous page should be prefetched when theres no next page
-	fullLayout: true, //true for full layout mode, false for minimalistic mode
+	fullLayout: false, //true for full layout mode, false for minimalistic mode
 	clikLeftHalfGoesBack: true, //specifies if clicking the left half of the image will take you to the previous page
 	flipControlsManga: false, //flip the controls (L/R arrows, L/R image click, back/next buttons) for mangas or other right-to-left content
 	autozoom: false, //enable fit-to-screen
@@ -1642,7 +1642,7 @@ var paginas = [
 					if(x<0 || x>thumbs.length) throw 'fail';
 					x = x.toString();
 					while(x.length<3) x='0'+x;
-					return html.match(/'([^']+\/images\/manga\/[^']+)'/)[1] + x + '.jpg'; 
+					return html.match(/'([^']+\/images\/manga\/[^']+)'/)[1] + x + '.jpg';
 				},
 		back:	function(html, pos){
 					var thumbs = JSON.parse(match(html, /params\.thumbs\s*=\s*(.+);/, 1));
@@ -2841,7 +2841,7 @@ var paginas = [
 				catch(e){
 					var chap = xpath('//div[@class="topbar_left"]/div[2]/ul/li[.//text()=//div[@class="topbar_left"]/div[2]/div/a/text()]/following-sibling::li[1]//@href', html);
 					var request = new XMLHttpRequest();
-					request.open('GET', chap, false); 
+					request.open('GET', chap, false);
 					request.send(null);
 
 					if (request.status === 200) {
@@ -2868,7 +2868,7 @@ var paginas = [
 		extra:	[function(html, pos){
 					var topbar = selCss('div.topbar', html);
 					if (!topbar) return;
-					
+
 					var basepath = "";
 					try{ basepath = html.match(/var\s+base_?url\s*=\s*([\'\"])(.*?)\1\s*;/i)[2]; }
 					catch(e){}
@@ -2876,7 +2876,7 @@ var paginas = [
 					for (var x = 0; x < relpaths.length; ++x) {
 						relpaths[x].setAttribute('href', basepath + relpaths[x].getAttribute('href'));
 					}
-					
+
 					var pagesLinks = xpath('//a[@onclick]', topbar, true);
 					for (var x = 0; x < pagesLinks.length; ++x) {
 						pagesLinks[x].removeAttribute('onclick');
@@ -3571,13 +3571,13 @@ var paginas = [
 					x = link[0].match(pgregex);
 					x = Number(x ? x[2] : 0)+posActual;
 					if (!x) scrollTo(0,0);
-					
+
 					if (!dir) {
 						function changeIPage(url, pagenum) {
 							if (pgregex.test(url)) return url.replace(pgregex, '$1ipage=' + pagenum);
 							return url.replace(/#.*$/, '') + (/\?./.test(url)?'&':'?') + 'ipage=' + pagenum;
 						}
-						
+
 						var contentLinks = document.querySelectorAll('a.sigProLink');
 						for (x = 0; x < contentLinks.length;) {
 							contentLinks[x].removeAttribute('rel');
@@ -3603,7 +3603,7 @@ var paginas = [
 					catch(e){
 						var chap = xpath('(//select[@class="cbo_wpm_chp"])/option[@selected]/following-sibling::option[1]/@value', html);
 						var request = new XMLHttpRequest();
-						request.open('GET', baseurl + chap +'/', false); 
+						request.open('GET', baseurl + chap +'/', false);
 						request.send(null);
 
 						if (request.status === 200) {
@@ -4296,7 +4296,7 @@ function run_script(){
 				if(defaultSettings.showSettingsOnFail) mostrarSettings();
 				else error('no settings found for this site');
 			}
-			
+
 			if(GM_registerMenuCommand){
 				GM_registerMenuCommand('Webcomic Reader - Disable for this site', function(){
 					if(confirm('Are you sure you want to disable Webcomic Reader on this site?\n'+
@@ -4422,7 +4422,7 @@ function iniciar(){
 		setEvt(elemImagen, 'click', imgClick);
 		setEvt(elemImagen, 'mousemove', imgCursor);
 		setEvt(elemImagen, 'load', function(){
-			fitImagen(); 
+			fitImagen();
 			scrollear();
 		});
 		setEvt('wcr_btnaddbm', 'click', addBookmark);
@@ -4515,7 +4515,7 @@ function setear(html, pos, dir){
 				}catch(e){error('set['+pos+']/extras['+i+']: '+e);}
 			}
 		}
-		
+
 		if(dir) get('wcr_btn'+dir).innerHTML = (dir>0?'Next':'Back')+' ('+((pos-posActual)*dir)+(link[pos+dir]?'':'!')+')';
 	}
 	catch(e){
@@ -4708,7 +4708,7 @@ function fitImagen(reintentando){
 		cambiarPorte(wi, hi);
 		//para ver si (des)aparecen las scrollbars y hay q recalcular
 		//"reintentando" para evitar posibles loops infinitos
-		if(!reintentando && size.p!=winsize().p) fitImagen(true); 
+		if(!reintentando && size.p!=winsize().p) fitImagen(true);
 	}
 	else get('wcr_imagen').setAttribute('style', '');
 }
@@ -6059,14 +6059,14 @@ function mostrarSettings(){
 					'1':'Enabled'
 				}
 			},
-			overwrite_links:{ desc:'Overwrite links', title:'If enabled, overwrites the original back/next links (when using the original layout) to work like the script\'s buttons', 
+			overwrite_links:{ desc:'Overwrite links', title:'If enabled, overwrites the original back/next links (when using the original layout) to work like the script\'s buttons',
 				def:'1',
 				vals:{
 					'0':'Disabled',
 					'1':'Enabled'
 				}
 			},
-			goToBookmark:{ desc: 'Go to bookmark', title: 'If you have 1 bookmark saved for a site, asks you if you want to go there when you visit the site', 
+			goToBookmark:{ desc: 'Go to bookmark', title: 'If you have 1 bookmark saved for a site, asks you if you want to go there when you visit the site',
 				def: defaultSettings.goToBookmark ? '1' : '0',
 				vals:{
 					'0':'Disabled',
@@ -6081,7 +6081,7 @@ function mostrarSettings(){
 					'1':'Enabled'
 				}
 			},
-			useHistoryAPI:{ desc: 'Use browser history', title: 'Changes the URL and keeps track of the visited pages in the browser history, so you can navigate with the browser\'s back/forward buttons as usual', 
+			useHistoryAPI:{ desc: 'Use browser history', title: 'Changes the URL and keeps track of the visited pages in the browser history, so you can navigate with the browser\'s back/forward buttons as usual',
 				def: '1',
 				vals:{
 					'0':'Disabled',
@@ -6184,7 +6184,7 @@ function mostrarSettings(){
 
 		//opciones visuales
 		var opsLayout = {
-			layout:{ desc:'Layout', title:'Minimalistic layout will show only the image, the defined extra content, and this script\'s buttons. Keeping the original layout will stuff that same content in the place where the image used to be, leaving the rest of the page untouched. This setting can also be toggled for this site with a keyboard shortcut (- by default)', 
+			layout:{ desc:'Layout', title:'Minimalistic layout will show only the image, the defined extra content, and this script\'s buttons. Keeping the original layout will stuff that same content in the place where the image used to be, leaving the rest of the page untouched. This setting can also be toggled for this site with a keyboard shortcut (- by default)',
 				def: defaultSettings.fullLayout ? '1' : '0',
 				vals:{
 					'0':'Minimalistic',
@@ -6628,7 +6628,7 @@ function initTeclas(teclas){
 
 			setEvt(input, 'keydown', function(evt){
 				if(evt.keyCode >= 16 && evt.keyCode <= 18 || evt.keyCode == 27) return; //ctrl/shift/alt o ESC (funca raro)
-				
+
 				if(evt.keyCode == 8){ //BACKSPACE, dejo la accion sin tecla
 					for(var h=0; h<hiddens.length; h++)
 						get(evt.target.id+'_'+hiddens[h]).value = '';
@@ -7329,7 +7329,7 @@ alert(
 			btnback y btnnext no avanzan si no se ha cargado la pag q viene
 			saltar directo a una pag si funciona, y empieza a cargar las imgs alrededor
 		cambiar condicion para sacar un img de las cargadas (actualmente mantiene la actual +-23)
-	
+
 	usar el doc magico para parsear las cosas ajaxeadas, asi no carga las imgs
 		hacer q las funciones parseadoras reciban el html y el doc
 		hacer una funcion htmlToDoc
