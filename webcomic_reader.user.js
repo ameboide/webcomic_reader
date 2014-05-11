@@ -42,7 +42,7 @@ var defaultSettings = {
 // ==UserScript==
 // @name           Webcomic Reader
 // @author         ameboide
-// @version        2014.02.22
+// @version        2014.05.11
 // @namespace      http://userscripts.org/scripts/show/59842
 // @description    Can work on almost any webcomic/manga page, preloads 5 or more pages ahead (or behind), navigates via ajax for instant-page-change, lets you use the keyboard, remembers your progress, and it's relatively easy to add new sites
 // @lastchanges    added 9 sites, fixed 4 more
@@ -417,8 +417,8 @@ var defaultSettings = {
 // @include        http://www.wigucomics.com/*
 // @include        http://www.mankin-trad.net/*
 // @include        http://mankin-trad.net/*
-// @include        http://www.mangahere.com/*
-// @include        http://es.mangahere.com/*
+// @include        http://www.mangahere.co/*
+// @include        http://es.mangahere.co/*
 // @include        http://www.scarygoround.com/*
 // @include        http://scarygoround.com/*
 // @include        http://www.schlockmercenary.com/*
@@ -2193,7 +2193,7 @@ var paginas = [
 		extra:	[[['.pagination']]],
 		scrollx:'R'
 	},
-	{	url:	'*.mangahere.com',
+	{	url:	'*.mangahere.co',
 		img:	[['#image']],
 		back:	function(html, pos){
 					var a = selCss('.prew_page', html);
