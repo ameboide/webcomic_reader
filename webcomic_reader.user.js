@@ -791,6 +791,7 @@ var defaultSettings = {
 // @include        http://www.punksandnerds.com/*
 // @include        http://*.troutcave.net/*
 // @include        http://www.berserkersdaughter.com/*
+// @include        http://gingerhaze.com/nimona/comic/*
 // ==/UserScript==
 
 var dataCache = null; //cache para no leer del disco y parsear la configuracion en cada getData
@@ -3993,7 +3994,11 @@ var paginas = [
 	},
 	{	url:	'*.troutcave.net',
 		style:	'#left-wrap, #comic{width:auto !important;}'
-	}
+	},
+	{   url:    'gingerhaze.com',
+        img:    'http://gingerhaze.com/sites/default/files/nimona-pages'
+    }
+
 	/*
 	,
 	{	url:	'',
