@@ -6,6 +6,7 @@ var defaultSettings = {
 	prefetchBackStart: 1, //number of prefetched pages behind when the script starts
 	prefetchNoNext: true, //specifies if previous page should be prefetched when theres no next page
 	fullLayout: true, //true for full layout mode, false for minimalistic mode
+	clickImgNavigates: true, //specifies if clicking the image will change pages
 	clikLeftHalfGoesBack: true, //specifies if clicking the left half of the image will take you to the previous page
 	flipControlsManga: false, //flip the controls (L/R arrows, L/R image click, back/next buttons) for mangas or other right-to-left content
 	autozoom: false, //enable fit-to-screen
@@ -42,10 +43,10 @@ var defaultSettings = {
 // ==UserScript==
 // @name           Webcomic Reader
 // @author         ameboide
-// @version        2014.05.11
+// @version        2014.07.04
 // @namespace      http://userscripts.org/scripts/show/59842
 // @description    Can work on almost any webcomic/manga page, preloads 5 or more pages ahead (or behind), navigates via ajax for instant-page-change, lets you use the keyboard, remembers your progress, and it's relatively easy to add new sites
-// @lastchanges    added 9 sites, fixed 4 more
+// @lastchanges    added a setting for disabling image-click-navigation, added 7 sites, fixed 2 more
 // @updatetype     24
 // @grant          GM_getValue
 // @grant          GM_setValue
@@ -53,9 +54,9 @@ var defaultSettings = {
 // @grant          GM_xmlhttpRequest
 // @grant          GM_registerMenuCommand
 // @grant          GM_openInTab
-// @updateURL      https://userscripts.org/scripts/source/59842.meta.js
-// @installURL     https://userscripts.org/scripts/source/59842.user.js
-// @downloadURL    https://userscripts.org/scripts/source/59842.user.js
+// @updateURL      http://userscripts.org:8080/scripts/source/59842.meta.js
+// @installURL     http://userscripts.org:8080/scripts/source/59842.user.js
+// @downloadURL    http://userscripts.org:8080/scripts/source/59842.user.js
 // @include        http://www.sluggy.com/*
 // @include        http://sluggy.com/*
 // @include        http://www.penny-arcade.com/comic*
@@ -202,6 +203,7 @@ var defaultSettings = {
 // @exclude        http://www.gocomics.com/
 // @exclude        http://www.gocomics.com/?*
 // @include        http://www.gunnerkrigg.com/*
+// @include        http://gunnerkrigg.com/*
 // @include        http://www.ho-lo.co.il/*
 // @include        http://www.jeffzugale.com/*
 // @include        http://www.threepanelsoul.com/*
@@ -437,7 +439,6 @@ var defaultSettings = {
 // @include        http://axecop.com/*
 // @include        http://www.somethingofthatilk.com/*
 // @include        http://somethingofthatilk.com/*
-// @include        http://imgur.com/*
 // @include        http://www.reddit.com/
 // @include        http://www.reddit.com/?*
 // @include        http://www.reddit.com/r/*
@@ -792,6 +793,13 @@ var defaultSettings = {
 // @include        http://*.troutcave.net/*
 // @include        http://www.berserkersdaughter.com/*
 // @include        http://gingerhaze.com/nimona/comic/*
+// @include        http://aiacrowd.com/*
+// @include        http://aspect.waywardstudios.net/*
+// @include        http://chirault.sevensmith.net/*
+// @include        http://cucumber.gigidigi.com/*
+// @include        http://filteredfuzz.com/*
+// @include        http://www.dorktower.com/*
+// @include        http://mangajoy.com/*
 // ==/UserScript==
 
 var dataCache = null; //cache para no leer del disco y parsear la configuracion en cada getData
@@ -938,12 +946,20 @@ var paginas = [
 				}
 	},
 	{	url:	'explosm.net/comics',
-		img:	[['div>img[src*="db/files"]']],
+		img:	function(html, pos){
+					try{ return selCss('div>img[src*="db/files"]', html); }
+					catch(e){ return xpath('//div[@align]/div[1]', html).style.backgroundImage.match(/"(.+)"/)[1]; }
+				},
 		back:	'.="< Previous"',
 		next:	'.="Next >"',
-		extra:	[['//a[contains(@href,"/author/")]/../..'], ' - ', [/<img alt[^>]+explosm\.net\/db\/files\/.*?([^\"\/]+)\.\w+\"/i, 1]],
+		extra:	[['//a[contains(@href,"/author/")]/../..'], ' - ', [/<img alt[^>]+explosm\.net\/db\/files\/.*?([^\"\/]+)\.\w+\"/i, 1], function(html, pos){
+					var url = selCss('[href$=autoplay]', html).getAttribute('href').replace(/autoplay$/, '');
+					var htmlVideo = syncRequest(url, pos);
+					return selCss('#videoPlayer', htmlVideo);
+				}],
 		bgcol:	'#fff',
-		txtcol:	'#000'
+		txtcol:	'#000',
+		layelem:'//div[@align]/div[1]'
 	},
 	{	url:	'pvponline.com',
 		img:	[['.comic-art img']],
@@ -2255,11 +2271,6 @@ var paginas = [
 		back:	'@class="prev"',
 		next:	'@class="next"',
 		extra:	[[['#captioning']]]
-	},
-	{	url:	'imgur.com',
-		img:	[['.image img']],
-		extra:	[[['.left h2']]],
-		style:	'#wcr_imagen{max-width:none;} .right-side{float:none !important;}'
 	},
 	{	url:	'reddit.com',
 		img:	function(html, pos){
@@ -3995,10 +4006,37 @@ var paginas = [
 	{	url:	'*.troutcave.net',
 		style:	'#left-wrap, #comic{width:auto !important;}'
 	},
-	{   url:    'gingerhaze.com',
-        img:    'http://gingerhaze.com/sites/default/files/nimona-pages'
-    }
-
+	{	url:	'gingerhaze.com',
+		img:	'http://gingerhaze.com/sites/default/files/nimona-pages'
+	},
+	{	url:	'gunnerkrigg.com',
+		back:	'img[contains(@src, "prev_a")]',
+		next:	'img[contains(@src, "next_a")]'
+	},
+	{	url:	'aiacrowd.com',
+		img:	[['#comic img']]
+	},
+	{	url:	'aspect.waywardstudios.net',
+		img:	'comics/'
+	},
+	{	url:	'cucumber.gigidigi.com',
+		img:	[['.webcomic-image img']]
+	},
+	{	url:	'filteredfuzz.com',
+		extra:	[[['.entry']]]
+	},
+	{	url:	'dorktower.com',
+		img:	[['.entry-content > p > img']],
+		back:	'.="Previous"',
+		next:	'.="Next"'
+	},
+	{	url:	'mangajoy.com',
+		img:	[['.prw a img']],
+		back:	'.="Prev"',
+		next:	'.="Next"',
+		style:	'.prw{overflow: visible !important;}',
+		scrollx:'R'
+	}
 	/*
 	,
 	{	url:	'',
@@ -4229,6 +4267,7 @@ var listabmTodos = null;
 var elemImagen = null;
 var slider = 0; // = setInterval(slideshow, secs);
 var flipControls = false; //invertir flechas/clicks/botones para mangas u otros q se lean al reves
+var clickImgNavigates = confBool('clickImgNavigates', true);
 
 function run_script(){
 	try{
@@ -4424,8 +4463,10 @@ function iniciar(){
 		setEvt(window, 'resize', fitImagen);
 		setEvt('wcr_btn1', 'click', btnnext);
 		setEvt('wcr_btn-1', 'click', btnback);
-		setEvt(elemImagen, 'click', imgClick);
-		setEvt(elemImagen, 'mousemove', imgCursor);
+		if(clickImgNavigates){
+			setEvt(elemImagen, 'click', imgClick);
+			setEvt(elemImagen, 'mousemove', imgCursor);
+		}
 		setEvt(elemImagen, 'load', function(){
 			fitImagen(); 
 			scrollear();
@@ -6050,6 +6091,13 @@ function mostrarSettings(){
 
 		//opciones generales
 		var opsGeneral = {
+			clickImgNavigates:{ desc:'Click image to navigate', title:'If enabled, clicking the image will let you go to the next or previous page',
+				def: defaultSettings.clickImgNavigates ? '1' : '0',
+				vals:{
+					'0':'Disabled',
+					'1':'Enabled'
+				}
+			},
 			click_img_izq:{ desc:'Click left half of<br/>image to go back', title:'If enabled, clicking the left half of the image will take you to the previous page, and the right half to the next one. Otherwise, clicking anywhere will always take you to the next page',
 				def: defaultSettings.clikLeftHalfGoesBack ? '1' : '0',
 				vals:{
