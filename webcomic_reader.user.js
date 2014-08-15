@@ -43,10 +43,10 @@ var defaultSettings = {
 // ==UserScript==
 // @name           Webcomic Reader
 // @author         ameboide
-// @version        2014.07.04
+// @version        2014.08.15
 // @namespace      http://userscripts.org/scripts/show/59842
 // @description    Can work on almost any webcomic/manga page, preloads 5 or more pages ahead (or behind), navigates via ajax for instant-page-change, lets you use the keyboard, remembers your progress, and it's relatively easy to add new sites
-// @lastchanges    added a setting for disabling image-click-navigation, added 7 sites, fixed 2 more
+// @lastchanges    added 1 site, fixed 4 more
 // @updatetype     24
 // @grant          GM_getValue
 // @grant          GM_setValue
@@ -800,6 +800,7 @@ var defaultSettings = {
 // @include        http://filteredfuzz.com/*
 // @include        http://www.dorktower.com/*
 // @include        http://mangajoy.com/*
+// @include        http://nhentai.net/*
 // ==/UserScript==
 
 var dataCache = null; //cache para no leer del disco y parsear la configuracion en cada getData
@@ -952,7 +953,7 @@ var paginas = [
 				},
 		back:	'.="< Previous"',
 		next:	'.="Next >"',
-		extra:	[['//a[contains(@href,"/author/")]/../..'], ' - ', [/<img alt[^>]+explosm\.net\/db\/files\/.*?([^\"\/]+)\.\w+\"/i, 1], function(html, pos){
+		extra:	[['//a[contains(@href,"/author/")]/../..'], ' - ', [/<img alt[^>]+explosm\.net\/db\/files\/.*?([^"\/]+)\.\w+"/i, 1], function(html, pos){
 					var url = selCss('[href$=autoplay]', html).getAttribute('href').replace(/autoplay$/, '');
 					var htmlVideo = syncRequest(url, pos);
 					return selCss('#videoPlayer', htmlVideo);
@@ -998,11 +999,10 @@ var paginas = [
 		extra:	['<br/>[', ['//h3/*/text()'], ']<br/><br/>', [/"storycontent"[\s\S]+?<img [\s\S]+?>([\s\S]+?)<\/div>/i, 1]]
 	},
 	{	url:	'thedoghousediaries.com',
-		img:	'http://thedoghousediaries.com/comics/',
-		back:	'@class="previous-comic-link"',
-		next:	'@class="next-comic-link"',
-		extra:	[['//div[@class="interior"]/div[contains(@id, "post-")]']],
-		bgcol:	'#fff'
+		img:	[['#comicimg']],
+		back:	[['#previouslink']],
+		next:	[['#nextlink']],
+		extra:	[[['#title-signoff-share']]]
 	},
 	{	url:	/erfworld\.com\/(page\/|$)/,
 		img:	['//div[@class="entry"]//img'],
@@ -1865,7 +1865,9 @@ var paginas = [
 	},
 	{	url:	'survivingtheworld.net',
 		img:	'Lesson|Recitation|GuestLecture',
-		extra:	[['//span[@class="style7"]'], ['//p[@class="style21"]', '']]
+		back:	[['.previous a']],
+		next:	[['.next a']],
+		extra:	[[['.comiccontainer > p[align="justify"]', '']]]
 	},
 	{	url:	'view.thespectrum.net|animephile.com',
 		img:	[['#mainimage']],
@@ -3833,7 +3835,7 @@ var paginas = [
 		scrollx:'R'
 	},
 	{	url:	'mangabird.com',
-		img:	'http://image.mangabird.info/sites/default/files/',
+		img:	[['#content img']],
 		back:	function(html, pos){
 					return link[pos].replace(/(page=)(\d+)/, function(s, p, n){
 						return n=='0' ? s : p + (parseInt(n) - 1);
@@ -4035,6 +4037,14 @@ var paginas = [
 		back:	'.="Prev"',
 		next:	'.="Next"',
 		style:	'.prw{overflow: visible !important;}',
+		scrollx:'R'
+	},
+	{	url:	'octopuspie.com',
+		img:	'http://www.octopuspie.com/strippy/'
+	},
+	{	url:	'nhentai.net',
+		img:	[['#page-container > p img']],
+		style:	'#page-container img{max-width: none;}',
 		scrollx:'R'
 	}
 	/*

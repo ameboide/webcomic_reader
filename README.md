@@ -1,6 +1,6 @@
 # Webcomic Reader
 
-Webcomic Reader userscript at [http://userscripts.org/scripts/show/59842](http://userscripts.org/scripts/show/59842)
+Webcomic Reader userscript originally hosted at [userscripts.org](http://userscripts.org/scripts/show/59842) (R.I.P.), currently also hosted at [openuserjs.org](https://openuserjs.org/scripts/ameboide/Webcomic_Reader) and [greasyfork.org](https://greasyfork.org/scripts/3008-webcomic-reader)
 
 Script for reading webcomics easier, nicer and faster. Tested on: Firefox, Chrome+Tampermonkey/NinjaKit, Safari+NinjaKit, Opera
 
