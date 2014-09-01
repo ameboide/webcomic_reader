@@ -506,7 +506,7 @@ var defaultSettings = {
 // @include        http://goldenagecomics.co.uk/*
 // @include        http://fourcolorshadows.blogspot.com/*
 // @include        http://thehorrorsofitall.blogspot.com/*
-// @include        http://www.batoto.net/*
+// @include        http://bato.to/*
 // @include        http://www.eegra.com/*
 // @include        http://www.octopuspie.com/*
 // @include        http://www.lovemenicecomic.com/*
@@ -2586,7 +2586,7 @@ var paginas = [
 				}],
 		layelem:'//div[@id="header-wrapper"]'
 	},
-	{	url:	'batoto.net',
+	{	url:	'bato.to',
 		img:	[['#comic_page']],
 		back:	function(html, pos){
 					try{ return xpath('//a[img[@title="Previous Page"]]', html); }
