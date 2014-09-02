@@ -54,9 +54,6 @@ var defaultSettings = {
 // @grant          GM_xmlhttpRequest
 // @grant          GM_registerMenuCommand
 // @grant          GM_openInTab
-// @updateURL      http://userscripts.org:8080/scripts/source/59842.meta.js
-// @installURL     http://userscripts.org:8080/scripts/source/59842.user.js
-// @downloadURL    http://userscripts.org:8080/scripts/source/59842.user.js
 // @include        http://www.sluggy.com/*
 // @include        http://sluggy.com/*
 // @include        http://www.penny-arcade.com/comic*
@@ -801,6 +798,7 @@ var defaultSettings = {
 // @include        http://www.dorktower.com/*
 // @include        http://mangajoy.com/*
 // @include        http://nhentai.net/*
+// @include        http://www.hejibits.com/*
 // ==/UserScript==
 
 var dataCache = null; //cache para no leer del disco y parsear la configuracion en cada getData
@@ -1344,7 +1342,7 @@ var paginas = [
 		next:	[['[rel="next"]']],
 		extra:	['<br/>', [/<span class="rss-title">(.*?)<\/span>/, 1], '<br/><br/>',
 					function(html, pos){
-						return unescape(contenido(html, [/mailto:.+?subject=(.*?)\"/, 1]));
+						return unescape(contenido(html, [/mailto:.+?subject=(.*?)\""?/, 1]));
 					}] //original: http://userscripts.org/scripts/show/51520
 	},
 	{	url:	'notinventedhe.re',
@@ -1474,13 +1472,13 @@ var paginas = [
 	},
 	{	url:	'gocomics.com',
 		img:	function(html, pos){
-					try{ return selCss('.strip[src*="width="]', html); }
+					try{ return selCss('div > .strip', html); }
 					catch(e){ return selCss('.strip', html); }
 				},
 		back:	['//ul[@class="feature-nav"]//a[@class="prev"]/@href'],
 		next:	['//ul[@class="feature-nav"]//a[@class="next"]/@href'],
 		last:	[['.newest']],
-		style:	'.feature_item, .feature, #content {width: auto !important;}',
+		style:	'.feature_item, .feature, #content {width: auto !important;} .zoom_link{display:none !important;}',
 		layelem:'//p[@class="feature_item"]//img',
 		fixurl:	function(url, img, link){
 					if (img && url.indexOf('width=') > 0) {
@@ -4044,9 +4042,14 @@ var paginas = [
 		img:	'http://www.octopuspie.com/strippy/'
 	},
 	{	url:	'nhentai.net',
-		img:	[['#page-container > p img']],
+		img:	[['#image-container img']],
+		back:	[['.previous']],
+		next:	[['.next']],
 		style:	'#page-container img{max-width: none;}',
 		scrollx:'R'
+	},
+	{	url:	'hejibits.com',
+		extra:	[[['.post-content']]]
 	}
 	/*
 	,
