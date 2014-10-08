@@ -43,10 +43,10 @@ var defaultSettings = {
 // ==UserScript==
 // @name           Webcomic Reader
 // @author         ameboide
-// @version        2014.09.1
+// @version        2014.10.07
 // @namespace      http://userscripts.org/scripts/show/59842
 // @description    Can work on almost any webcomic/manga page, preloads 5 or more pages ahead (or behind), navigates via ajax for instant-page-change, lets you use the keyboard, remembers your progress, and it's relatively easy to add new sites
-// @lastchanges    added 1 site, fixed 4 more
+// @lastchanges    added 4 sites, fixed 3 more
 // @updatetype     24
 // @grant          GM_getValue
 // @grant          GM_setValue
@@ -574,6 +574,7 @@ var defaultSettings = {
 // @include        http://slide.extrascans.net/*
 // @include        http://*.thewebcomic.com/*
 // @include        http://www.mangapark.com/*
+// @include        http://mangapark.com/*
 // @include        http://www.manga-go.com/*
 // @include        http://www.comicstriplibrary.org/display/*
 // @include        http://comicstriplibrary.org/display/*
@@ -673,7 +674,7 @@ var defaultSettings = {
 // @include        http://www.mangatank.com/*
 // @include        http://www.snowflakescomic.com/*
 // @include        http://mangafox.mobi/*
-// @include        http://www.mangainn.com/*
+// @include        http://www.mangainn.me/*
 // @include        http://invisiblebread.com/*
 // @include        http://www.shiftylook.com/comics/*
 // @include        http://onlinereader.mangapirate.net/*
@@ -799,6 +800,11 @@ var defaultSettings = {
 // @include        http://mangajoy.com/*
 // @include        http://nhentai.net/*
 // @include        http://www.hejibits.com/*
+// @include        http://mangaindo.co/*
+// @include        http://5.79.87.81/*
+// @include        http://www.dm72.com/*
+// @include        http://dm72.com/*
+// @include        http://www.gao-subs.com/*
 // ==/UserScript==
 
 var dataCache = null; //cache para no leer del disco y parsear la configuracion en cada getData
@@ -3272,26 +3278,28 @@ var paginas = [
 		next:	'img',
 		scrollx:'R'
 	},
-	{	url:	'mangainn.com',
+	{	url:	'mangainn.me',
 		img:	[['#imgPage']],
 		back:	function(html, pos){
+					var m = link[pos].match(/^(.+\/chapter\/)([^\/]+)/);
 					try{
-						return link[pos].replace(/[^\/]+$/, 'page_') +
+						return m[1] + m[2] + '/page_' +
 							xpath('//select[@id="cmbpages"]/option[@selected]/preceding-sibling::option[1]/@value', html);
 					}catch(e){
-						return link[pos].replace(/[^\/]+\/[^\/]+$/, '') +
+						return m[1] +
 							xpath('//select[@id="chapters"]/option[@selected]/preceding-sibling::option[1]/@value', html) +
-							'/pages_1';
+							'/page_1';
 					}
 				},
 		next:	function(html, pos){
+					var m = link[pos].match(/^(.+\/chapter\/)([^\/]+)/);
 					try{
-						return link[pos].replace(/[^\/]+$/, 'page_') +
+						return m[1] + m[2] + '/page_' +
 							xpath('//select[@id="cmbpages"]/option[@selected]/following-sibling::option[1]/@value', html);
 					}catch(e){
-						return link[pos].replace(/[^\/]+\/[^\/]+$/, '') +
+						return m[1] +
 							xpath('//select[@id="chapters"]/option[@selected]/following-sibling::option[1]/@value', html) +
-							'/pages_1';
+							'/page_1';
 					}
 				},
 		scrollx:'R'
@@ -3833,7 +3841,7 @@ var paginas = [
 		scrollx:'R'
 	},
 	{	url:	'mangabird.com',
-		img:	[['#content img']],
+		img:	[['.content > a > img']],
 		back:	function(html, pos){
 					return link[pos].replace(/(page=)(\d+)/, function(s, p, n){
 						return n=='0' ? s : p + (parseInt(n) - 1);
@@ -4050,6 +4058,27 @@ var paginas = [
 	},
 	{	url:	'hejibits.com',
 		extra:	[[['.post-content']]]
+	},
+	{	url:	'mangaindo.co',
+		img:	[['.prw a img']],
+		back:	[['.pvs']],
+		next:	[['.nxt']],
+		style:	'.prw img{max-width:none !important;}',
+		scrollx:'R'
+	},
+	{	url:	'5.79.87.81',
+		img:	[['#gsImageView img']],
+		back:	[['.previous']],
+		next:	[['.next']],
+		scrollx:'R'
+	},
+	{	url:	'gao-subs.com',
+		img:	[['#midManga img']],
+		back:	['//div[@class="pageButtonDivSelected"]/preceding-sibling::div[1]/a'],
+		js:		function(dir){
+					if(!dir) document.onkeyup = null;
+				},
+		scrollx:'R'
 	}
 	/*
 	,
