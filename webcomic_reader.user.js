@@ -43,10 +43,10 @@ var defaultSettings = {
 // ==UserScript==
 // @name           Webcomic Reader
 // @author         ameboide
-// @version        2014.10.07
+// @version        2014.10.18
 // @namespace      http://userscripts.org/scripts/show/59842
 // @description    Can work on almost any webcomic/manga page, preloads 5 or more pages ahead (or behind), navigates via ajax for instant-page-change, lets you use the keyboard, remembers your progress, and it's relatively easy to add new sites
-// @lastchanges    added 4 sites, fixed 3 more
+// @lastchanges    added 2 sites, fixed 5 more
 // @updatetype     24
 // @grant          GM_getValue
 // @grant          GM_setValue
@@ -250,8 +250,8 @@ var defaultSettings = {
 // @include        http://www.stainedglasssamurai.com/*
 // @include        http://stainedglasssamurai.com/*
 // @include        http://*.seraph-inn.com/*
-// @include        http://www.fakku.net/manga/*
-// @include        http://www.fakku.net/doujinshi/*
+// @include        https://www.fakku.net/manga/*
+// @include        https://www.fakku.net/doujinshi/*
 // @include        http://www.deadwinter.cc/*
 // @include        http://deadwinter.cc/*
 // @include        http://www.loveisintheblood.com/*
@@ -742,10 +742,10 @@ var defaultSettings = {
 // @include        http://www.anticscomic.com/*
 // @include        http://octopuns.blogspot.com/*
 // @include        http://www.onemanga.me/*
-// @include        http://mngacow.com/*
+// @include        http://mangacow.co/*
 // @include        http://www.mangabee.com/*
 // @include        http://www.ver-manga.net/*
-// @include        http://mangadoom.com/*
+// @include        http://mangadoom.co/*
 // @include        http://www.powernapcomic.com/*
 // @include        http://www.ismanga.com/*
 // @include        http://www.mangabird.com/*
@@ -805,6 +805,9 @@ var defaultSettings = {
 // @include        http://www.dm72.com/*
 // @include        http://dm72.com/*
 // @include        http://www.gao-subs.com/*
+// @include        http://www.mangawindow.com/*
+// @include        http://mangawindow.com/*
+// @include        http://omgmanga.com/*
 // ==/UserScript==
 
 var dataCache = null; //cache para no leer del disco y parsear la configuracion en cada getData
@@ -1003,7 +1006,7 @@ var paginas = [
 		extra:	['<br/>[', ['//h3/*/text()'], ']<br/><br/>', [/"storycontent"[\s\S]+?<img [\s\S]+?>([\s\S]+?)<\/div>/i, 1]]
 	},
 	{	url:	'thedoghousediaries.com',
-		img:	[['#comicimg']],
+		img:	[['#imgdiv img']],
 		back:	[['#previouslink']],
 		next:	[['#nextlink']],
 		extra:	[[['#title-signoff-share']]]
@@ -3261,7 +3264,7 @@ var paginas = [
 	{	url:	'masterbloodfer.org',
 		scrollx:'R'
 	},
-	{	url:	'mangatank.com|mangapark.com',
+	{	url:	'mangatank.com|mangapark.com|mangawindow.com',
 		img:	[['.img-link img']],
 		style:	'#wcr_div{line-height:1;}',
 		js:		function(dir){
@@ -3819,7 +3822,7 @@ var paginas = [
 		img:	[['.manga-page']],
 		scrollx:'R'
 	},
-	{	url:	'mngacow.com|mangadoom.com',
+	{	url:	'mangacow.co|mangadoom.co|omgmanga.com',
 		img:	[['.prw a img']],
 		back:	'.="Prev"',
 		next:	'.="Next"',
@@ -4050,10 +4053,12 @@ var paginas = [
 		img:	'http://www.octopuspie.com/strippy/'
 	},
 	{	url:	'nhentai.net',
-		img:	[['#image-container img']],
+		img:	['//div[@id="image-container"]//img/@src | //div[@id="image-container"]//img/@data-cfsrc'],
 		back:	[['.previous']],
 		next:	[['.next']],
+		extra:	[[['#page-container > *', '<br/>', 2]]],
 		style:	'#page-container img{max-width: none;}',
+		layelem:'//div[@id="content"]',
 		scrollx:'R'
 	},
 	{	url:	'hejibits.com',
@@ -5077,7 +5082,7 @@ function xpath(query, elem, arreglo){
 	if(!arreglo){
 		res = res.singleNodeValue;
 		//si es un atributo retorno el valor, si no retorno el nodo
-		if(query.match(/@\w+$/)) return res.value;
+		if(query.match(/@[\w-]+$/)) return res.value;
 		return res;
 	}
 
