@@ -6800,7 +6800,7 @@ function htmlSitio(props){
 			html += '<td>'+tds[0]+'</td><td style="width:400px">'+tds[1]+'</td></tr>';
 		}
 	}
-	html += '</table><br/>Hover over a textbox for its meaning and an explanation on how to use it<br/><br/>For a detailed guide on adding new sites, check <a href="http://userscripts.org/topics/86377#posts-380342">this thread</a> in the script site';
+	html += '</table><br/>Hover over a textbox for its meaning and an explanation on how to use it<br/><br/>For a detailed guide on adding new sites, check <a href="http://userscripts-mirror.org/topics/86377#posts-380342">this thread</a> in the script site';
 	/*todo:
 		agregar los tests
 			4° td con boton test y un tr invisible abajo para el resultado
