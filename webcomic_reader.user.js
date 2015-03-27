@@ -43,10 +43,10 @@ var defaultSettings = {
 // ==UserScript==
 // @name           Webcomic Reader
 // @author         ameboide
-// @version        2014.10.18
+// @version        2015.03.27
 // @namespace      http://userscripts.org/scripts/show/59842
 // @description    Can work on almost any webcomic/manga page, preloads 5 or more pages ahead (or behind), navigates via ajax for instant-page-change, lets you use the keyboard, remembers your progress, and it's relatively easy to add new sites
-// @lastchanges    added 2 sites, fixed 5 more
+// @lastchanges    added 2 sites, fixed 6 more
 // @updatetype     24
 // @grant          GM_getValue
 // @grant          GM_setValue
@@ -67,9 +67,9 @@ var defaultSettings = {
 // @include        https://www.xkcd.com/*
 // @include        https://xkcd.com/*
 // @include        http://www.giantitp.com/*
-// @include        http://www.dilbert.com/*
-// @include        http://dilbert.com/*
-// @include        http://hf.dilbert.com/*
+// @include        http://www.dilbert.com/strip/*
+// @include        http://dilbert.com/strip/*
+// @include        http://hf.dilbert.com/strip/*
 // @include        http://www.explosm.net/*
 // @include        http://explosm.net/*
 // @include        http://www.nuklearpower.com/*
@@ -808,6 +808,8 @@ var defaultSettings = {
 // @include        http://www.mangawindow.com/*
 // @include        http://mangawindow.com/*
 // @include        http://omgmanga.com/*
+// @include        http://paintraincomic.com/*
+// @include        http://extrafabulouscomics.com/*
 // ==/UserScript==
 
 var dataCache = null; //cache para no leer del disco y parsear la configuracion en cada getData
@@ -943,31 +945,19 @@ var paginas = [
 		bgcol:	'#fff'
 	},
 	{	url:	'*.dilbert.com',
-		img:	[['.STR_Image img, .LGT_Date ~ img']],
-		back:	[['.STR_Prev, .LGT_Date a:nth-of-type(1)']],
-		next:	[['.STR_Next, .LGT_Date a:nth-of-type(2)']],
-		fixurl:	function(url, img, link){
-					if (img && (!keepLayout || document.location.href.indexOf('/fast/') > 0)) {
-						url = url.replace(/\.(sunday|print)\.gif/, '.gif').replace('.gif', '.zoom.gif');
-					}
-					return url;
-				}
+		img:	[['.img-comic']],
+		back:	'@alt="Older Strip"',
+		next:	'@alt="Newer Strip"'
 	},
 	{	url:	'explosm.net/comics',
-		img:	function(html, pos){
-					try{ return selCss('div>img[src*="db/files"]', html); }
-					catch(e){ return xpath('//div[@align]/div[1]', html).style.backgroundImage.match(/"(.+)"/)[1]; }
-				},
-		back:	'.="< Previous"',
-		next:	'.="Next >"',
-		extra:	[['//a[contains(@href,"/author/")]/../..'], ' - ', [/<img alt[^>]+explosm\.net\/db\/files\/.*?([^"\/]+)\.\w+"/i, 1], function(html, pos){
-					var url = selCss('[href$=autoplay]', html).getAttribute('href').replace(/autoplay$/, '');
+		img:	[['#main-comic']],
+		extra:	[['//small[@class="author-credit-name"]/../../..'], [/<img id="main-comic" .+?\/([^"\/]+)\.\w+"/i, 1], function(html, pos){
+					var url = selCss('#main-comic', html).parentNode.getAttribute('href');
+					if(!url) return '';
 					var htmlVideo = syncRequest(url, pos);
-					return selCss('#videoPlayer', htmlVideo);
+					return selCss('.flex-video', htmlVideo);
 				}],
-		bgcol:	'#fff',
-		txtcol:	'#000',
-		layelem:'//div[@align]/div[1]'
+		style:	'#wcr_imagen{max-width:none;}'
 	},
 	{	url:	'pvponline.com',
 		img:	[['.comic-art img']],
@@ -986,20 +976,11 @@ var paginas = [
 		extra:	[['//title/text()'], ' - ', ['//td/font/i/b/text()'], ['//img[contains(@src, "/comics/archive/")]/following-sibling::table']]
 	},
 	{	url:	'smbc-comics.com',
-		img:	[['#comicimage img']],
-		back:	[['.backRollover[href]']],
-		next:	[['.nextRollover[href]']],
-		extra:	[['//div[@id="aftercomic"]/img[contains(@src,"/")]']],
-		style:	'div{float:none;}',
-		js:		function(dir){
-					if(!dir){
-						exec('document.removeEventListener("keyup", onKeyUp, false)');
-						setEvt(document, 'keyup', function(evt){
-							exec('checkCodes('+evt.keyCode+')');
-							if([88, 191, 82].indexOf(evt.keyCode) >= 0) exec('jumpToRandom()');
-						});
-					}
-				}
+		img:	[['#comic']],
+		back:	[['.prev']],
+		next:	[['.next']],
+		extra:	[['//div[@id="aftercomic"]/img[contains(@src,"/")]'], [['.cc-newscontent:first-of-type']]],
+		style:	'#wcr_extra .date, #wcr_extra .blogtext{text-align: center;}'
 	},
 	{	url:	'abstrusegoose.com',
 		img:	'http://abstrusegoose.com/strips/',
@@ -1180,6 +1161,7 @@ var paginas = [
 					var htmlHidden = syncRequest(href, pos);
 					return contenido(htmlHidden, [['#comic > *', '']]);
 				}, [['.post']]],
+		style:	'#page,#header{width:auto;}',
 		layelem:'//div[@id="comic-1"]'
 	},
 	{	url:	'anymanga.com',
@@ -1602,8 +1584,8 @@ var paginas = [
 	},
 	{	url:	'pbfcomics.com',
 		img:	'/archive',
-		back:	'.="Older"',
-		next:	'.="Newer"',
+		back:	'img[contains(@src,"Older")]',
+		next:	'img[contains(@src,"Newer")]',
 		extra:	[['//center/span/b[1]']]
 	},
 	{	url:	'tjandamal.com',
@@ -3092,7 +3074,9 @@ var paginas = [
 		extra:	[[['h2']], ['//h2/following-sibling::p', '', 2]]
 	},
 	{	url:	'hbrowse.com',
-		img:	[['.pageImage img']]
+		img:	[['.pageImage img']],
+		back:	['//a[not(@href)]/preceding-sibling::a[1] | //a[@name="prev" and not(starts-with(@href, "javascript"))]'],
+		next:	['//a[not(@href)]/following-sibling::a[1] | //a[@name="next" and not(starts-with(@href, "javascript"))]']
 	},
 	{	url:	'vexxarr.com',
 		img:	[['img[src^="Vexxarr"]:not([src*="header"])']],
@@ -4084,6 +4068,13 @@ var paginas = [
 					if(!dir) document.onkeyup = null;
 				},
 		scrollx:'R'
+	},
+	{	url:	'paintraincomic.com',
+		img:	[['#comic img']],
+		extra:	[[['.post-content']]]
+	},
+	{	url:	'extrafabulouscomics.com',
+		style:	'#page{width:auto;}'
 	}
 	/*
 	,
