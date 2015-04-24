@@ -3806,7 +3806,7 @@ var paginas = [
 		img:	[['.manga-page']],
 		scrollx:'R'
 	},
-	{	url:	'mangacow.co|mangadoom.co|omgmanga.com',
+	{	url:	'mangadoom.co|omgmanga.com',
 		img:	[['.prw a img']],
 		back:	'.="Prev"',
 		next:	'.="Next"',
