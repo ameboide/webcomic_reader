@@ -3813,6 +3813,13 @@ var paginas = [
 		style:	'#wcr_imagen{max-width:none;}#sct_col_l.full_width{width:auto;}',
 		scrollx:'R'
 	},
+	{	url:	'mangacow.co',
+		img:	[['.prw a img']],
+		back:	'img[@alt="Back"]',
+		next:	'img[@alt="Next"]',
+		style:	'#wcr_imagen{max-width:none;}#sct_col_l.full_width{width:auto;}',
+		scrollx:'R'
+	},
 	{	url:	'ver-manga.net',
 		img:	'http://www.ver-manga.net/cdn/',
 		back:	'.="Anterior"',
