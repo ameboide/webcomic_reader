@@ -120,6 +120,7 @@ var defaultSettings = {
 // @include        http://www.anymanga.com/*
 // @include        http://anymanga.com/*
 // @include        http://mangafox.me/*
+// @include        http://m.mangafox.me/*
 // @include        http://www.leasticoulddo.com/*
 // @include        http://leasticoulddo.com/*
 // @include        http://www.sinfest.net/*
@@ -1169,6 +1170,14 @@ var paginas = [
 		back:	[/var url_back = "([^\"]+)"/, 1],
 		next:	[/var url_next = "([^\"]+)"/, 1],
 		scrollx:'R'
+	},
+	{
+		url:	'm.mangafox.me'
+		img	['//img[@id="image"]'],
+		back:	['//select/option[@selected]/preceding-sibling::*[1]'],
+		next	['//div[@id="viewer"]/a'],
+		scrollx:'R'
+
 	},
 	{	url:	'mangafox.me',
 		img:	['//img[@id="image"]'],
