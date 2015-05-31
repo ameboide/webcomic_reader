@@ -1172,10 +1172,10 @@ var paginas = [
 		scrollx:'R'
 	},
 	{
-		url:	'm.mangafox.me'
-		img	['//img[@id="image"]'],
+		url:	'm.mangafox.me',
+		img:	['//img[@id="image"]'],
 		back:	['//select/option[@selected]/preceding-sibling::*[1]'],
-		next	['//div[@id="viewer"]/a'],
+		next:	['//div[@id="viewer"]/a'],
 		scrollx:'R'
 
 	},
