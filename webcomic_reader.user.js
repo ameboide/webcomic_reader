@@ -120,6 +120,7 @@ var defaultSettings = {
 // @include        http://www.anymanga.com/*
 // @include        http://anymanga.com/*
 // @include        http://mangafox.me/*
+// @include        http://m.mangafox.me/*
 // @include        http://www.leasticoulddo.com/*
 // @include        http://leasticoulddo.com/*
 // @include        http://www.sinfest.net/*
@@ -1169,6 +1170,14 @@ var paginas = [
 		back:	[/var url_back = "([^\"]+)"/, 1],
 		next:	[/var url_next = "([^\"]+)"/, 1],
 		scrollx:'R'
+	},
+	{
+		url:	'm.mangafox.me',
+		img:	['//img[@id="image"]'],
+		back:	['//select/option[@selected]/preceding-sibling::*[1]'],
+		next:	['//div[@id="viewer"]/a'],
+		scrollx:'R'
+
 	},
 	{	url:	'mangafox.me',
 		img:	['//img[@id="image"]'],
@@ -3806,10 +3815,17 @@ var paginas = [
 		img:	[['.manga-page']],
 		scrollx:'R'
 	},
-	{	url:	'mangacow.co|mangadoom.co|omgmanga.com',
+	{	url:	'mangadoom.co|omgmanga.com',
 		img:	[['.prw a img']],
 		back:	'.="Prev"',
 		next:	'.="Next"',
+		style:	'#wcr_imagen{max-width:none;}#sct_col_l.full_width{width:auto;}',
+		scrollx:'R'
+	},
+	{	url:	'mangacow.co',
+		img:	[['.prw a img']],
+		back:	'img[@alt="Back"]',
+		next:	'img[@alt="Next"]',
 		style:	'#wcr_imagen{max-width:none;}#sct_col_l.full_width{width:auto;}',
 		scrollx:'R'
 	},
