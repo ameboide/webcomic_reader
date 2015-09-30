@@ -5329,6 +5329,7 @@ function imgCursor(evt){
 	if(!evt || !evt.currentTarget) return;
 	var img = evt.currentTarget;
 	var dir = imgDerecha(evt) ? 1 : -1;
+	img.style.cursor = ''
 	img.style.cursor = cursor(dir, 'img');
 	ultimoevt = evt;
 }
