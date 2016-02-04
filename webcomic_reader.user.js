@@ -810,6 +810,8 @@ var defaultSettings = {
 // @include        http://omgmanga.com/*
 // @include        http://paintraincomic.com/*
 // @include        http://extrafabulouscomics.com/*
+// @include        http://www.sssscomic.com/*
+// @include        http://sssscomic.com/*
 // ==/UserScript==
 
 var dataCache = null; //cache para no leer del disco y parsear la configuracion en cada getData
@@ -4075,6 +4077,11 @@ var paginas = [
 	},
 	{	url:	'extrafabulouscomics.com',
 		style:	'#page{width:auto;}'
+	},
+	{	url:	'*.sssscomic.com/',
+		img:	[['img.comicnormal']],
+		back: ['//*[@id="navprev"]/..'],
+		next: ['//*[@id="navnext"]/..']
 	}
 	/*
 	,
