@@ -682,6 +682,7 @@ var defaultSettings = {
 // @include        http://8comic.com/love/*
 // @include        http://www.mangahead.com/*
 // @include        http://mangahead.com/*
+// @include        http://mangahead.me/*
 // @include        http://www.vickifox.com/*
 // @include        http://www.spinnyverse.com/*
 // @include        http://zenpencils.com/*
@@ -2228,6 +2229,33 @@ var paginas = [
 				}, [['.wid60']]],
 		scrollx:'R'
 	},
+	{	url:	'*.mangahere.me',
+		img:	[['#image']],
+		back:	function(html, pos){
+					var a = selCss('.prew_page', html);
+					if(a.href.indexOf('javascript:')) return a;
+					return xpath('//strong[.="Previous Chapter:" or .="Capítulo Anterior:"]/following-sibling::a/@href', html) + "last.html";
+				},
+		next:	function(html, pos){
+					try{ return xpath('//select[@class="wid60"]/option[@selected]/following-sibling::option[1]/@value', html); }
+					catch(e){ return xpath('//p[contains(., "es el siguiente...")]/a | //strong[.="Next Chapter:"]/following-sibling::a', html); }
+				},
+		js:		function(dir){
+					if(!dir) exec("previous_page = next_page = '';");
+					var selcap = selCss('#wcr_extra #top_chapter_list');
+					var caps = selcap.options;
+					for(var i=0; i<caps.length; i++){
+						if(link[posActual].indexOf(caps[i].value) >= 0){
+							selcap.selectedIndex = i;
+							break;
+						}
+					}
+				},
+		extra:	[function(html, pos){
+					return selCss('#top_chapter_list', pos ? document : html);
+				}, [['.wid60']]],
+		scrollx:'R'
+	},
 	{	url:	'spaceavalanche.com',
 		img:	[['.entry img']]
 	},
@@ -3395,6 +3423,12 @@ var paginas = [
 		scrollx:'R'
 	},
 	{	url:	'mangahead.com',
+		img:	[['#mangahead_image']],
+		back:	'@id="page_previous"',
+		next:	'@id="page_next"',
+		scrollx:'R'
+	},
+	{	url:	'mangahead.me',
 		img:	[['#mangahead_image']],
 		back:	'@id="page_previous"',
 		next:	'@id="page_next"',
