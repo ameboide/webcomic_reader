@@ -810,6 +810,7 @@ var defaultSettings = {
 // @include        http://omgmanga.com/*
 // @include        http://paintraincomic.com/*
 // @include        http://extrafabulouscomics.com/*
+// @include        http://thephantomcomics.com/*
 // ==/UserScript==
 
 var dataCache = null; //cache para no leer del disco y parsear la configuracion en cada getData
@@ -4075,7 +4076,13 @@ var paginas = [
 	},
 	{	url:	'extrafabulouscomics.com',
 		style:	'#page{width:auto;}'
-	}
+	},
+    {
+        url:    'thephantomcomics.com',
+        img:    ['//*[@id="post-59408"]/div[2]/p/img'],
+        back:	['//*[@id="previouscomic"]/a'],
+		next:	['//*[@id="nextcomic"]/a'],
+    }
 	/*
 	,
 	{	url:	'',
